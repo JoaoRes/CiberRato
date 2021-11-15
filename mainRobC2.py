@@ -1,6 +1,7 @@
 
 from os import write
 import sys
+from typing import DefaultDict
 from croblink import *
 from math import *
 import xml.etree.ElementTree as ET
@@ -8,7 +9,17 @@ import xml.etree.ElementTree as ET
 CELLROWS=7
 CELLCOLS=14
 
+
+
 class MyRob(CRobLinkAngs):
+
+    posinitial = ()
+    target = ()
+    prevTarget = ()
+    mypos= ()
+    myorient = ()
+    nextorient = ()
+
     def __init__(self, rob_name, rob_id, angles, host):
         CRobLinkAngs.__init__(self, rob_name, rob_id, angles, host)
 
@@ -27,94 +38,153 @@ class MyRob(CRobLinkAngs):
             quit()
 
         state = 'stop'
-        stopped_state = 'run'
+        stopped_state = 'go'
+
         self.readSensors()
-        global initialx
-        initialx = self.measures.x
-        print("run" , initialx)
-        global initialy
-        initialy = self.measures.y
-        print("run" , initialy)
         while True:
             self.readSensors()
-
             if self.measures.endLed:
                 print(self.rob_name + " exiting")
                 quit()
 
             if state == 'stop' and self.measures.start:
+                self.posinitial = (self.measures.x, self.measures.y)
+                self.target = (0,0)
+                self.prevTarget = self.target
                 state = stopped_state
 
             if state != 'stop' and self.measures.stop:
                 stopped_state = state
                 state = 'stop'
 
-            if state == 'run':
-                if self.measures.visitingLed==True:
-                    state='wait'
+            if state == 'go':
+                self.mypos = (round(self.measures.x - self.posinitial[0],2) , round(self.measures.y-self.posinitial[1],2))
+                print('POSICAO INICIAL', self.posinitial)
+                print('MINHA POSICAO', self.mypos)
+                print('TARGET',self.target)
+                print('\n')
                 if self.measures.ground==0:
                     self.setVisitingLed(True)
-                self.wander()
-            elif state=='wait':
-                self.setReturningLed(True)
-                if self.measures.visitingLed==True:
-                    self.setVisitingLed(False)
-                if self.measures.returningLed==True:
-                    state='return'
-                self.driveMotors(0.0,0.0)
-            elif state=='return':
-                if self.measures.visitingLed==True:
-                    self.setVisitingLed(False)
-                if self.measures.returningLed==True:
-                    self.setReturningLed(False)
-                self.wander()
-
-    
-    def print_position(self):
-        print()
-
-    def wander(self):
-        center_id = 0
-        left_id = 1
-        right_id = 2
-        back_id = 3
-        compass = self.measures.compass
-        x = self.measures.x
-        y = self.measures.y
-        self.mapWriting()
-        self.move(compass)
-        
-        
-    def move(self,compass):
-        walls = self.checkwalls()
-        if walls[0]==0:
-            print()
+                    
+                if self.target == (0,0):
+                    self.calculateTarget(self.mypos)
+                elif self.reached(self.mypos,self.target):
+                
+                    state= 'end'
+                    self.calculateTarget(self.mypos)
+                else:
+                    print('BUSSULA',self.measures.compass)
+                    print('CORRECAO DA BUSSOLA',self.correctCompass())
+                    self.straight(0.06,self.measures.compass,0.05,self.correctCompass())
+            if state== 'rotate right':
+                print("ESTOU A RODAR")
+                if self.nextorient == ():
+                    self.nextorient = self.myorient-90
+                elif abs(self.measures.compass - self.nextorient) <= 5:
+                    self.myorient= self.nextorient
+                    self.nextorient = ()
+                    state = 'go'
+                else:
+                    self.driveMotors(0.05,-0.05)
+            if state == 'rotate left':
+                if self.nextorient == ():
+                    self.nextorient = self.myorient+90
+                elif abs(self.measures.compass - self.nextorient) <=5:
+                    self.myorient= self.nextorient
+                    self.nextorient = ()
+                    state = 'go'
+                else:
+                    self.driveMotors(-0.05,0.05)                
+            if state == 'end':
+                self.prevTarget= self.target
+                self.target= (0,0)
+                self.driveMotors(0,0)
+                print('PAREDES ', self.checkwalls())
+                if self.checkwalls()[0]== 1:
+                    if self.checkwalls()[1]== 0:
+                        state = 'rotate right'
+                    elif self.checkwalls()[2]== 0:
+                        state = 'rotate left'
+                else:
+                    state = 'go'
                 
 
+    def calculateTarget(self, mypos):
+        if self.correctCompass()== 0:
+            self.target = (self.prevTarget[0]+2, self.prevTarget[1])
+            self.myorient = self.correctCompass()
+        elif self.correctCompass()== 90:
+            self.target = (self.prevTarget[0], self.prevTarget[1]+2)
+            self.myorient = self.correctCompass()
+        elif self.correctCompass()== -90:
+            self.target = (self.prevTarget[0], self.prevTarget[1]-2)
+            self.myorient = self.correctCompass()
+        elif self.correctCompass()== 180:
+            self.target = (self.prevTarget[0]-2, self.prevTarget[1])
+            self.myorient = self.correctCompass()
+        
+        return self.target
+
+    def straight(self, linear, m, k, ref):
+        rot = k * (m-ref)
+
+        right_wheel = linear - (rot/2)
+        left_wheel = linear + (rot/2)
+
+        self.driveMotors(left_wheel,right_wheel)
+
+    def reached(self, mypos, target):
+        if self.myorient== 0 :
+            if abs(mypos[0] -target[0]) <= 0.2:
+                return 1
+        elif self.myorient== 90 :
+            if abs(mypos[1] - target[1]) <= 0.2:
+                return 1
+        elif self.myorient== -90 :
+            if abs(mypos[1] -target[1]) <= 0.2:
+                return 1
+        elif self.myorient== 180 :
+            if abs(mypos[0] -target[0]) <= 0.2:
+                return 1        
+
     
+    def correctCompass(self):
+        if -10 < self.measures.compass < 10:
+            return 0
+        elif 80 < self.measures.compass< 100:
+            return 90
+        elif -100 < self.measures.compass <-80:
+            return -90
+        elif self.measures.compass <= -160 or self.measures.compass>= 160:
+            return 180
+
+
+
+
+
     def checkwalls(self):
         center_id = 0
         left_id = 1
         right_id = 2
         back_id = 3
         
-        walls = [0,0,0,0]       # walls =[front, right, down, left]
+        walls = [0,0,0,0]       # walls =[front, right, left, back]
 
 
-        if self.measures.irSensor[center_id] > 2 : 
-            print("wall up")
+        if self.measures.irSensor[center_id] > 1 : 
+            #print("wall front")
             walls[0] = 1
-        if self.measures.irSensor[left_id] > 2 : 
-            print("wall left")
-            walls[3] = 1
-        if self.measures.irSensor[right_id] > 2 : 
-            print("wall right")
-            walls[1]=1
-        if self.measures.irSensor[back_id] > 2 : 
-            print("wall back")
-            walls[4]=1
+        if self.measures.irSensor[right_id] > 1 : 
+            #print("wall right")
+            walls[1] = 1
+        if self.measures.irSensor[left_id] > 1 : 
+            #print("wall left")
+            walls[2]=1
+        if self.measures.irSensor[back_id] > 1 : 
+            #print("wall back")
+            walls[3]=1
         
-        print(walls)
+        #print(walls)
         return walls
 
     def mapWriting(self):
