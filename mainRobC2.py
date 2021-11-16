@@ -12,7 +12,8 @@ CELLCOLS=14
 
 
 class MyRob(CRobLinkAngs):
-
+    visited = set()
+    notTaken = set()
     posinitial = ()
     target = ()
     prevTarget = ()
@@ -66,11 +67,14 @@ class MyRob(CRobLinkAngs):
                 print('\n')
                 if self.measures.ground==0:
                     self.setVisitingLed(True)
-                    
+
                 if self.target == ():
+                    
                     self.calculateTarget()
                 elif self.reached(self.mypos,self.target):
                     self.prevTarget = self.target
+                    self.visited.add(self.prevTarget)
+                    print("VISITED NODES", self.visited)
                     state= 'end'
                 else:
                     print('BUSSULA',self.measures.compass)
@@ -129,6 +133,30 @@ class MyRob(CRobLinkAngs):
                 else:
                     state = 'go'
                 
+    # def calculatePossibleTargets(self):
+    #     walls = self.checkwalls()
+
+    #     if walls == [0,1,0,0]:
+    #         self.target = (self.prevTarget[0]+2, self.prevTarget[1])
+    #         self.notTaken.add((self.prevTarget[0],self.prevTarget[1]+2))
+    #     if walls == [0,1,1,0]:
+    #         self.target = (self.prevTarget[0]+2, self.prevTarget[1])
+    #     if walls == [0,0,1,0]:
+    #         self.target = (self.prevTarget[0]+2, self.prevTarget[1])
+    #         self.notTaken.add((self.prevTarget[0],self.prevTarget[1]-2))    
+    #     if walls == [0,0,0,0]:
+    #         self.target = (self.prevTarget[0]+2, self.prevTarget[1])
+    #         self.notTaken.add((self.prevTarget[0],self.prevTarget[1]+2))
+    #         self.notTaken.add((self.prevTarget[0],self.prevTarget[1]-2))
+    #     if walls == [1,0,0,0]:
+    #         self.target= (self.prevTarget[0],self.prevTarget[1]+2)
+    #         self.notTaken.add((self.prevTarget[0],self.prevTarget[1]-2))
+    #     if walls == [1,1,0,0]:
+    #         self.target= (self.prevTarget[0],self.prevTarget[1]-2)
+    #     if walls == [1,0,1,0]:
+    #         self.target= (self.prevTarget[0],self.prevTarget[1]+2)
+            
+
 
     def calculateTarget(self):
         print('ESTOU A CALCULAR')
