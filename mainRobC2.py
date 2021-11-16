@@ -50,7 +50,7 @@ class MyRob(CRobLinkAngs):
             if state == 'stop' and self.measures.start:
                 self.posinitial = (self.measures.x, self.measures.y)
                 self.target = (0,0)
-                self.prevTarget = self.target
+                self.prevTarget = (0,0)
                 state = stopped_state
 
             if state != 'stop' and self.measures.stop:
@@ -59,6 +59,7 @@ class MyRob(CRobLinkAngs):
 
             if state == 'go':
                 self.mypos = (round(self.measures.x - self.posinitial[0],2) , round(self.measures.y-self.posinitial[1],2))
+                self.myorient = self.correctCompass()
                 print('POSICAO INICIAL', self.posinitial)
                 print('MINHA POSICAO', self.mypos)
                 print('TARGET',self.target)
@@ -66,62 +67,83 @@ class MyRob(CRobLinkAngs):
                 if self.measures.ground==0:
                     self.setVisitingLed(True)
                     
-                if self.target == (0,0):
-                    self.calculateTarget(self.mypos)
+                if self.target == ():
+                    self.calculateTarget()
                 elif self.reached(self.mypos,self.target):
-                
+                    self.prevTarget = self.target
                     state= 'end'
-                    self.calculateTarget(self.mypos)
                 else:
                     print('BUSSULA',self.measures.compass)
                     print('CORRECAO DA BUSSOLA',self.correctCompass())
-                    self.straight(0.06,self.measures.compass,0.05,self.correctCompass())
+                    if self.correctCompass() == 180:
+                        if self.measures.compass < 0:
+                            self.straight(0.15,self.measures.compass,0.05,self.correctCompass())
+                        else: 
+                            self.straight(0.15,self.measures.compass,0.05,self.correctCompass())
+                    else:
+                        self.straight(0.15,self.measures.compass,0.05,self.correctCompass())
             if state== 'rotate right':
                 print("ESTOU A RODAR")
                 if self.nextorient == ():
-                    self.nextorient = self.myorient-90
+                    if self.correctCompass() == 180 or self.correctCompass() == -180: 
+                        self.nextorient = 90
+                    else:
+                        self.nextorient = self.myorient-90
+                    print("OBJETIVO", self.nextorient)
                 elif abs(self.measures.compass - self.nextorient) <= 5:
                     self.myorient= self.nextorient
                     self.nextorient = ()
-                    state = 'go'
+                    state = 'end'
                 else:
-                    self.driveMotors(0.05,-0.05)
+                    print(self.measures.compass)
+                    self.driveMotors(0.03,-0.03)
             if state == 'rotate left':
                 if self.nextorient == ():
-                    self.nextorient = self.myorient+90
+                    if self.correctCompass() == 180 or self.correctCompass() == -180: 
+                        self.nextorient = -90
+                    else:
+                        self.nextorient = self.myorient+90
+                    print("OBJETIVO", self.nextorient)
                 elif abs(self.measures.compass - self.nextorient) <=5:
                     self.myorient= self.nextorient
                     self.nextorient = ()
-                    state = 'go'
+                    state = 'end'
                 else:
-                    self.driveMotors(-0.05,0.05)                
+                    print(self.measures.compass)
+                    self.driveMotors(-0.03,0.03)                
             if state == 'end':
-                self.prevTarget= self.target
-                self.target= (0,0)
+                self.target= ()
                 self.driveMotors(0,0)
                 print('PAREDES ', self.checkwalls())
                 if self.checkwalls()[0]== 1:
+                    print('IM HERE CHECK WALL 1')
                     if self.checkwalls()[1]== 0:
+                        print('IM HERE CHECK WALL 2')
                         state = 'rotate right'
                     elif self.checkwalls()[2]== 0:
+                        print('IM HERE CHECK WALL 3')
                         state = 'rotate left'
+                    elif self.checkwalls()[0]== 1 and self.checkwalls()[1]== 1 and self.checkwalls()[2]== 1:
+                         print(self.checkwalls())
+                         state = 'rotate right' 
                 else:
                     state = 'go'
                 
 
-    def calculateTarget(self, mypos):
+    def calculateTarget(self):
+        print('ESTOU A CALCULAR')
         if self.correctCompass()== 0:
+            print('PREVIOUS TARGET',self.prevTarget)
             self.target = (self.prevTarget[0]+2, self.prevTarget[1])
-            self.myorient = self.correctCompass()
         elif self.correctCompass()== 90:
+            print('PREVIOUS TARGET',self.prevTarget)
             self.target = (self.prevTarget[0], self.prevTarget[1]+2)
-            self.myorient = self.correctCompass()
         elif self.correctCompass()== -90:
+            print('PREVIOUS TARGET',self.prevTarget)
             self.target = (self.prevTarget[0], self.prevTarget[1]-2)
-            self.myorient = self.correctCompass()
-        elif self.correctCompass()== 180:
-            self.target = (self.prevTarget[0]-2, self.prevTarget[1])
-            self.myorient = self.correctCompass()
+        elif self.correctCompass()== 180 or self.correctCompass()== -180:
+            print('PREVIOUS TARGET',self.prevTarget)
+            self.target = (self.prevTarget[0]-2, self.prevTarget[1])  
         
         return self.target
 
@@ -135,16 +157,16 @@ class MyRob(CRobLinkAngs):
 
     def reached(self, mypos, target):
         if self.myorient== 0 :
-            if abs(mypos[0] -target[0]) <= 0.2:
+            if abs(mypos[0] -target[0]) <= 0.3:
                 return 1
         elif self.myorient== 90 :
-            if abs(mypos[1] - target[1]) <= 0.2:
+            if abs(mypos[1] - target[1]) <= 0.3:
                 return 1
         elif self.myorient== -90 :
-            if abs(mypos[1] -target[1]) <= 0.2:
+            if abs(mypos[1] -target[1]) <= 0.3:
                 return 1
-        elif self.myorient== 180 :
-            if abs(mypos[0] -target[0]) <= 0.2:
+        elif self.myorient== 180  or self.myorient==-180:
+            if abs(mypos[0] -target[0]) <= 0.3:
                 return 1        
 
     
@@ -155,8 +177,9 @@ class MyRob(CRobLinkAngs):
             return 90
         elif -100 < self.measures.compass <-80:
             return -90
-        elif self.measures.compass <= -160 or self.measures.compass>= 160:
-            return 180
+        elif self.measures.compass <= -170 or self.measures.compass >= 170:  
+            return 180 * self.measures.compass / abs(self.measures.compass)
+
 
 
 
@@ -171,16 +194,16 @@ class MyRob(CRobLinkAngs):
         walls = [0,0,0,0]       # walls =[front, right, left, back]
 
 
-        if self.measures.irSensor[center_id] > 1 : 
+        if self.measures.irSensor[center_id] >= 1.2 : 
             #print("wall front")
             walls[0] = 1
-        if self.measures.irSensor[right_id] > 1 : 
+        if self.measures.irSensor[right_id] >= 1.2 : 
             #print("wall right")
             walls[1] = 1
-        if self.measures.irSensor[left_id] > 1 : 
+        if self.measures.irSensor[left_id] >= 1.2 : 
             #print("wall left")
             walls[2]=1
-        if self.measures.irSensor[back_id] > 1 : 
+        if self.measures.irSensor[back_id] >= 1.2 : 
             #print("wall back")
             walls[3]=1
         
