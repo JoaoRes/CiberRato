@@ -20,6 +20,7 @@ class MyRob(CRobLinkAngs):
     mypos= ()
     myorient = ()
     nextorient = ()
+    d = {(28,14): 'I'}
 
     def __init__(self, rob_name, rob_id, angles, host):
         CRobLinkAngs.__init__(self, rob_name, rob_id, angles, host)
@@ -325,8 +326,7 @@ class MyRob(CRobLinkAngs):
         #print('FREE SPACE X ',(28+x,14-y))
         self.add_dict((28+x,14-y), 'X')
 
-        if (x,y) == (-2,0):
-            self.mapWriting()
+        self.mapWriting()
 
         # print(self.d)
         # print('\n')
