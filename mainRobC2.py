@@ -213,6 +213,124 @@ class MyRob(CRobLinkAngs):
 
 
 
+    def add_dict(self, key, str):
+        if key not in self.d:
+            self.d[key] = str
+
+    def compass_orientation(self,walls):
+        compass = self.measures.compass
+        (x, y) = (round(self.measures.x - self.posinitial[0]), round(self.measures.y - self.posinitial[1]))
+
+        if -45 < compass < 45:
+            if walls[0] == 1 :
+                #print('WALL FRONT | ',(28+x+1,14-y))
+                self.add_dict((28+x+1,14-y), '|')
+            else: 
+                #print('FREE SPACE X ',(28+x+1,14-y))
+                self.add_dict((28+x+1,14-y), 'X')
+            if walls[1] == 1 :
+                #print('WALL RIGHT - ',(28+x,14-y+1))
+                self.add_dict((28+x,14-y+1), '-')
+            else: 
+                #print('FREE SPACE X ',(28+x,14-y+1))
+                self.add_dict((28+x,14-y+1), 'X')
+            if walls[2] == 1 :
+                #print('WALL LEFT - ',(28+x,14-y-1))
+                self.add_dict((28+x,14-y-1), '-')
+            else: 
+                #print('FREE SPACE X ',(28+x,14-y-1))
+                self.add_dict((28+x,14-y-1), 'X')
+            if walls[3] == 1 :
+                #print('WALL BACK | ',(28+x-1,14-y))
+                self.add_dict((28+x-1,14-y), '|')
+            else: 
+                #print('FREE SPACE X ',(28+x-1,14-y))
+                self.add_dict((28+x-1,14-y), 'X')    
+        elif 45 < compass < 135:
+            if walls[0] == 1 :
+                #print('WALL FRONT - ',(28+x,14-y-1))
+                self.add_dict((28+x,14-y-1), '-')
+            else: 
+                #print('FREE SPACE X ',(28+x,14-y-1))
+                self.add_dict((28+x,14-y-1), 'X')
+            if walls[1] == 1 :
+                #print('WALL RIGHT | ',(28+x+1,14-y))
+                self.add_dict((28+x+1,14-y), '|')
+            else: 
+                #print('FREE SPACE X ',(28+x+1,14-y))
+                self.add_dict((28+x+1,14-y), 'X')
+            if walls[2] == 1 :
+                #print('WALL LEFT | ',(28+x-1,14-y))
+                self.add_dict((28+x-1,14-y), '|')
+            else: 
+                #print('FREE SPACE X ',(28+x-1,14-y))
+                self.add_dict((28+x-1,14-y), 'X')
+            if walls[3] == 1 :
+                #print('WALL BACK | ',(28+x,14-y+1))
+                self.add_dict((28+x,14-y+1), '-')
+            else: 
+                #print('FREE SPACE X ',(28+x,14-y+1))
+                self.add_dict((28+x,14-y+1), 'X')
+        elif 135 < compass or compass < -135:
+            if walls[0] == 1 :
+                #print('WALL FRONT | ',(28+x-1,14-y))
+                self.add_dict((28+x-1,14-y), '|')
+            else: 
+                #print('FREE SPACE X ',(28+x-1,14-y))
+                self.add_dict((28+x-1,14-y), 'X')
+            if walls[1] == 1 :
+                #print('WALL RIGHT - ',(28+x,14-y-1))
+                self.add_dict((28+x,14-y-1), '-')
+            else: 
+                #print('FREE SPACE X ',(28+x,14-y-1))
+                self.add_dict((28+x,14-y-1), 'X')
+            if walls[2] == 1 :
+                #print('WALL LEFT - ',(28+x,14-y+1))
+                self.add_dict((28+x,14-y+1), '-')
+            else: 
+                #print('FREE SPACE X ',(28+x,14-y+1))
+                self.add_dict((28+x,14-y+1), 'X')
+            if walls[3] == 1 :
+                #print('WALL BACK | ',(28+x+1,14-y))
+                self.add_dict((28+x+1,14-y), '|')
+            else:
+                #print('FREE SPACE X ',(28+x+1,14-y))
+                self.add_dict((28+x+1,14-y), 'X')
+        elif -100 < compass < -80:
+            if walls[0] == 1 :
+                #print('WALL FRONT - ',(28+x,14-y+1))
+                self.add_dict((28+x,14-y+1), '-')
+            else: 
+                #print('FREE SPACE X ',(28+x,14-y+1))
+                self.add_dict((28+x,14-y+1), 'X')
+            if walls[1] == 1 :
+                #print('WALL RIGHT | ',(28+x-1,14-y))
+                self.add_dict((28+x-1,14-y), '|')
+            else: 
+                #print('FREE SPACE X ',(28+x-1,14-y))
+                self.add_dict((28+x-1,14-y), 'X')
+            if walls[2] == 1 :
+                #print('WALL LEFT | ',(28+x+1,14-y))
+                self.add_dict((28+x+1,14-y), '|')
+            else: 
+                #print('FREE SPACE X ',(28+x+1,14-y))
+                self.add_dict((28+x+1,14-y), 'X')
+            if walls[3] == 1 :
+                #print('WALL BACK - ',(28+x,14-y-1))
+                self.add_dict((28+x,14-y-1), '-')
+            else: 
+                #print('FREE SPACE X ',(28+x,14-y-1))
+                self.add_dict((28+x,14-y-1), 'X')
+
+        #print('FREE SPACE X ',(28+x,14-y))
+        self.add_dict((28+x,14-y), 'X')
+
+        if (x,y) == (-2,0):
+            self.mapWriting()
+
+        # print(self.d)
+        # print('\n')
+        
     def checkwalls(self):
         center_id = 0
         left_id = 1
@@ -220,7 +338,6 @@ class MyRob(CRobLinkAngs):
         back_id = 3
         
         walls = [0,0,0,0]       # walls =[front, right, left, back]
-
 
         if self.measures.irSensor[center_id] >= 1.2 : 
             #print("wall front")
@@ -235,16 +352,18 @@ class MyRob(CRobLinkAngs):
             #print("wall back")
             walls[3]=1
         
+        self.compass_orientation(walls)
         #print(walls)
         return walls
 
     def mapWriting(self):
         file= open("mapping.txt", 'w')    
-        for i in range(0,26):
-            for j in range(0,55):
-                if i == 14 and j == 28:
-                    file.write('I')
-                file.write(' ')
+        for i in range(1,27):
+            for j in range(1,56):
+                if (j,i) in self.d:
+                    file.write(self.d.get((j,i)))
+                else:
+                    file.write(' ')
             file.write('\n')
         
         file.close()
