@@ -70,12 +70,13 @@ class MyRob(CRobLinkAngs):
                     self.setVisitingLed(True)
 
                 if self.target == ():
-                    
                     self.calculateTarget()
+                    self.searchUnknown()
                 elif self.reached(self.mypos,self.target):
                     self.prevTarget = self.target
                     self.visited.add(self.prevTarget)
                     print("VISITED NODES", self.visited)
+                    print("NOT VISITED NODES", self.notTaken)
                     state= 'end'
                 else:
                     print('BUSSULA',self.measures.compass)
@@ -138,32 +139,73 @@ class MyRob(CRobLinkAngs):
     #     walls = self.checkwalls()
 
     #     if walls == [0,1,0,0]:
-    #         self.target = (self.prevTarget[0]+2, self.prevTarget[1])
-    #         self.notTaken.add((self.prevTarget[0],self.prevTarget[1]+2))
+    #         self.target = self.calculateTarget()
+    #         self.notTaken.add(self.calculateTarget())
     #     if walls == [0,1,1,0]:
-    #         self.target = (self.prevTarget[0]+2, self.prevTarget[1])
+    #         self.target = self.calculateTarget()
     #     if walls == [0,0,1,0]:
-    #         self.target = (self.prevTarget[0]+2, self.prevTarget[1])
-    #         self.notTaken.add((self.prevTarget[0],self.prevTarget[1]-2))    
+    #         self.target = self.calculateTarget()
+    #         self.notTaken.add(self.calculateTarget())    
     #     if walls == [0,0,0,0]:
-    #         self.target = (self.prevTarget[0]+2, self.prevTarget[1])
-    #         self.notTaken.add((self.prevTarget[0],self.prevTarget[1]+2))
-    #         self.notTaken.add((self.prevTarget[0],self.prevTarget[1]-2))
+    #         self.target = self.calculateTarget()
+    #         self.notTaken.add(self.calculateTarget())
+    #         self.notTaken.add(self.calculateTarget())
     #     if walls == [1,0,0,0]:
-    #         self.target= (self.prevTarget[0],self.prevTarget[1]+2)
-    #         self.notTaken.add((self.prevTarget[0],self.prevTarget[1]-2))
+    #         self.target= self.calculateTarget()
+    #         self.notTaken.add(self.calculateTarget())
     #     if walls == [1,1,0,0]:
-    #         self.target= (self.prevTarget[0],self.prevTarget[1]-2)
+    #         self.target= self.calculateTarget()
     #     if walls == [1,0,1,0]:
-    #         self.target= (self.prevTarget[0],self.prevTarget[1]+2)
+    #         self.target= self.calculateTarget
+    #     if walls == [0,1,0,1]:
+    #         self.target = self.calculateTarget()
+    #         self.notTaken.add(self.calculateTarget())
+    #     if walls == [0,1,1,1]:
+    #         self.target = self.calculateTarget()
+    #     if walls == [0,0,1,1]:
+    #         self.target = self.calculateTarget()
+    #         self.notTaken.add(self.calculateTarget())    
+    #     if walls == [0,0,0,1]:
+    #         self.target = self.calculateTarget()
+    #         self.notTaken.add(self.calculateTarget())
+    #         self.notTaken.add(self.calculateTarget())
+    #     if walls == [1,0,0,1]:
+    #         self.target= self.calculateTarget()
+    #         self.notTaken.add(self.calculateTarget())
+    #     if walls == [1,1,0,1]:
+    #         self.target= self.calculateTarget()
+    #     if walls == [1,0,1,1]:
+    #         self.target= self.calculateTarget
             
+    
+    def searchUnknown(self):
 
+        center_id = 0
+        left_id = 1
+        right_id = 2
+        back_id = 3
+        current = self.correctCompass()
+        entries = []
+
+        if current == 0:
+            if self.measures.irSensor[center_id] <= 1.2:
+                entries.append((self.prevTarget[0]+2,self.prevTarget[1]))
+            if self.measures.irSensor[left_id] <= 1.2:
+                entries.append((self.prevTarget[0],self.prevTarget[1]+2))
+            if self.measures.irSensor[right_id] <= 1.2:
+                entries.append((self.prevTarget[0],self.prevTarget[1]-2))
+
+        for entry in entries:
+            if entry not in self.visited:
+                self.notTaken.add(entry)
 
     def calculateTarget(self):
         print('ESTOU A CALCULAR')
         if self.correctCompass()== 0:
             print('PREVIOUS TARGET',self.prevTarget)
             self.target = (self.prevTarget[0]+2, self.prevTarget[1])
+            if self.target in self.notTaken:
+                self.notTaken.discard(self.target)
         elif self.correctCompass()== 90:
             print('PREVIOUS TARGET',self.prevTarget)
             self.target = (self.prevTarget[0], self.prevTarget[1]+2)
@@ -174,7 +216,6 @@ class MyRob(CRobLinkAngs):
             print('PREVIOUS TARGET',self.prevTarget)
             self.target = (self.prevTarget[0]-2, self.prevTarget[1])  
         
-        return self.target
 
     def straight(self, linear, m, k, ref):
         rot = k * (m-ref)
