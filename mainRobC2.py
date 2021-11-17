@@ -62,10 +62,10 @@ class MyRob(CRobLinkAngs):
             if state == 'go':
                 self.mypos = (round(self.measures.x - self.posinitial[0],2) , round(self.measures.y-self.posinitial[1],2))
                 self.myorient = self.correctCompass()
-                print('POSICAO INICIAL', self.posinitial)
-                print('MINHA POSICAO', self.mypos)
-                print('TARGET',self.target)
-                print('\n')
+                # print('POSICAO INICIAL', self.posinitial)
+                # print('MINHA POSICAO', self.mypos)
+                # print('TARGET',self.target)
+                # print('\n')
                 if self.measures.ground==0:
                     self.setVisitingLed(True)
 
@@ -79,8 +79,8 @@ class MyRob(CRobLinkAngs):
                     print("NOT VISITED NODES", self.notTaken)
                     state= 'end'
                 else:
-                    print('BUSSULA',self.measures.compass)
-                    print('CORRECAO DA BUSSOLA',self.correctCompass())
+                    # print('BUSSULA',self.measures.compass)
+                    # print('CORRECAO DA BUSSOLA',self.correctCompass())
                     if self.correctCompass() == 180:
                         if self.measures.compass < 0:
                             self.straight(0.15,self.measures.compass,0.05,self.correctCompass())
@@ -89,19 +89,19 @@ class MyRob(CRobLinkAngs):
                     else:
                         self.straight(0.15,self.measures.compass,0.05,self.correctCompass())
             if state== 'rotate right':
-                print("ESTOU A RODAR")
+                # print("ESTOU A RODAR")
                 if self.nextorient == ():
                     if self.correctCompass() == 180 or self.correctCompass() == -180: 
                         self.nextorient = 90
                     else:
                         self.nextorient = self.myorient-90
-                    print("OBJETIVO", self.nextorient)
+                    # print("OBJETIVO", self.nextorient)
                 elif abs(self.measures.compass - self.nextorient) <= 5:
                     self.myorient= self.nextorient
                     self.nextorient = ()
                     state = 'end'
                 else:
-                    print(self.measures.compass)
+                    # print(self.measures.compass)
                     self.driveMotors(0.03,-0.03)
             if state == 'rotate left':
                 if self.nextorient == ():
@@ -109,28 +109,28 @@ class MyRob(CRobLinkAngs):
                         self.nextorient = -90
                     else:
                         self.nextorient = self.myorient+90
-                    print("OBJETIVO", self.nextorient)
+                    # print("OBJETIVO", self.nextorient)
                 elif abs(self.measures.compass - self.nextorient) <=5:
                     self.myorient= self.nextorient
                     self.nextorient = ()
                     state = 'end'
                 else:
-                    print(self.measures.compass)
+                    # print(self.measures.compass)
                     self.driveMotors(-0.03,0.03)                
             if state == 'end':
                 self.target= ()
                 self.driveMotors(0,0)
-                print('PAREDES ', self.checkwalls())
+                # print('PAREDES ', self.checkwalls())
                 if self.checkwalls()[0]== 1:
-                    print('IM HERE CHECK WALL 1')
+                    # print('IM HERE CHECK WALL 1')
                     if self.checkwalls()[1]== 0:
-                        print('IM HERE CHECK WALL 2')
+                        # print('IM HERE CHECK WALL 2')
                         state = 'rotate right'
                     elif self.checkwalls()[2]== 0:
-                        print('IM HERE CHECK WALL 3')
+                        # print('IM HERE CHECK WALL 3')
                         state = 'rotate left'
                     elif self.checkwalls()[0]== 1 and self.checkwalls()[1]== 1 and self.checkwalls()[2]== 1:
-                         print(self.checkwalls())
+                        #  print(self.checkwalls())
                          state = 'rotate right' 
                 else:
                     state = 'go'
@@ -200,20 +200,20 @@ class MyRob(CRobLinkAngs):
                 self.notTaken.add(entry)
 
     def calculateTarget(self):
-        print('ESTOU A CALCULAR')
+        # print('ESTOU A CALCULAR')
         if self.correctCompass()== 0:
-            print('PREVIOUS TARGET',self.prevTarget)
+            # print('PREVIOUS TARGET',self.prevTarget)
             self.target = (self.prevTarget[0]+2, self.prevTarget[1])
             if self.target in self.notTaken:
                 self.notTaken.discard(self.target)
         elif self.correctCompass()== 90:
-            print('PREVIOUS TARGET',self.prevTarget)
+            # print('PREVIOUS TARGET',self.prevTarget)
             self.target = (self.prevTarget[0], self.prevTarget[1]+2)
         elif self.correctCompass()== -90:
-            print('PREVIOUS TARGET',self.prevTarget)
+            # print('PREVIOUS TARGET',self.prevTarget)
             self.target = (self.prevTarget[0], self.prevTarget[1]-2)
         elif self.correctCompass()== 180 or self.correctCompass()== -180:
-            print('PREVIOUS TARGET',self.prevTarget)
+            # print('PREVIOUS TARGET',self.prevTarget)
             self.target = (self.prevTarget[0]-2, self.prevTarget[1])  
         
 
@@ -250,127 +250,115 @@ class MyRob(CRobLinkAngs):
         elif self.measures.compass <= -170 or self.measures.compass >= 170:  
             return 180 * self.measures.compass / abs(self.measures.compass)
 
-
-
-
-
-
+    #add to dictionary if not present
     def add_dict(self, key, str):
         if key not in self.d:
             self.d[key] = str
 
+    #checks compass orientation 
     def compass_orientation(self,walls):
-        compass = self.measures.compass
+        compass = self.correctCompass()
         (x, y) = (round(self.measures.x - self.posinitial[0]), round(self.measures.y - self.posinitial[1]))
 
-        if -45 < compass < 45:
+        if compass==0:
             if walls[0] == 1 :
-                #print('WALL FRONT | ',(28+x+1,14-y))
                 self.add_dict((28+x+1,14-y), '|')
             else: 
-                #print('FREE SPACE X ',(28+x+1,14-y))
                 self.add_dict((28+x+1,14-y), 'X')
             if walls[1] == 1 :
-                #print('WALL RIGHT - ',(28+x,14-y+1))
                 self.add_dict((28+x,14-y+1), '-')
             else: 
-                #print('FREE SPACE X ',(28+x,14-y+1))
                 self.add_dict((28+x,14-y+1), 'X')
+                if (x,y-2) not in self.visited:
+                    self.notTaken.add((x,y-2))
+                    #self.add_dict((28+x,14-y+2), 'X')
             if walls[2] == 1 :
-                #print('WALL LEFT - ',(28+x,14-y-1))
                 self.add_dict((28+x,14-y-1), '-')
             else: 
-                #print('FREE SPACE X ',(28+x,14-y-1))
                 self.add_dict((28+x,14-y-1), 'X')
-            if walls[3] == 1 :
-                #print('WALL BACK | ',(28+x-1,14-y))
-                self.add_dict((28+x-1,14-y), '|')
-            else: 
-                #print('FREE SPACE X ',(28+x-1,14-y))
-                self.add_dict((28+x-1,14-y), 'X')    
-        elif 45 < compass < 135:
+                if (x,y+2) not in self.visited:
+                    self.notTaken.add((x,y+2))
+                    #self.add_dict((28+x,14-y-2), 'X')
+            # if walls[3] == 1 :
+            #     self.add_dict((28+x-1,14-y), '|')
+            # else: 
+            #     self.add_dict((28+x-1,14-y), 'X')   
+        elif compass==90:
             if walls[0] == 1 :
-                #print('WALL FRONT - ',(28+x,14-y-1))
                 self.add_dict((28+x,14-y-1), '-')
             else: 
-                #print('FREE SPACE X ',(28+x,14-y-1))
                 self.add_dict((28+x,14-y-1), 'X')
             if walls[1] == 1 :
-                #print('WALL RIGHT | ',(28+x+1,14-y))
                 self.add_dict((28+x+1,14-y), '|')
             else: 
-                #print('FREE SPACE X ',(28+x+1,14-y))
                 self.add_dict((28+x+1,14-y), 'X')
+                if (x+2,y) not in self.visited:
+                    self.notTaken.add((x+2,y))
+                    #self.add_dict((28+x+2,14-y), 'X')
             if walls[2] == 1 :
-                #print('WALL LEFT | ',(28+x-1,14-y))
                 self.add_dict((28+x-1,14-y), '|')
             else: 
-                #print('FREE SPACE X ',(28+x-1,14-y))
                 self.add_dict((28+x-1,14-y), 'X')
-            if walls[3] == 1 :
-                #print('WALL BACK | ',(28+x,14-y+1))
-                self.add_dict((28+x,14-y+1), '-')
-            else: 
-                #print('FREE SPACE X ',(28+x,14-y+1))
-                self.add_dict((28+x,14-y+1), 'X')
-        elif 135 < compass or compass < -135:
+                if (x-2,y) not in self.visited:
+                    self.notTaken.add((x-2,y))
+                    #self.add_dict((28+x-2,14-y), 'X')
+            # if walls[3] == 1 :
+            #     self.add_dict((28+x,14-y+1), '-')
+            # else: 
+            #     self.add_dict((28+x,14-y+1), 'X')
+        elif compass==180:
             if walls[0] == 1 :
-                #print('WALL FRONT | ',(28+x-1,14-y))
                 self.add_dict((28+x-1,14-y), '|')
             else: 
-                #print('FREE SPACE X ',(28+x-1,14-y))
                 self.add_dict((28+x-1,14-y), 'X')
             if walls[1] == 1 :
-                #print('WALL RIGHT - ',(28+x,14-y-1))
                 self.add_dict((28+x,14-y-1), '-')
             else: 
-                #print('FREE SPACE X ',(28+x,14-y-1))
                 self.add_dict((28+x,14-y-1), 'X')
+                if (x,y+2) not in self.visited:
+                    self.notTaken.add((x,y+2))
+                    #self.add_dict((28+x,14-y-2), 'X')
             if walls[2] == 1 :
-                #print('WALL LEFT - ',(28+x,14-y+1))
                 self.add_dict((28+x,14-y+1), '-')
             else: 
-                #print('FREE SPACE X ',(28+x,14-y+1))
                 self.add_dict((28+x,14-y+1), 'X')
-            if walls[3] == 1 :
-                #print('WALL BACK | ',(28+x+1,14-y))
-                self.add_dict((28+x+1,14-y), '|')
-            else:
-                #print('FREE SPACE X ',(28+x+1,14-y))
-                self.add_dict((28+x+1,14-y), 'X')
-        elif -100 < compass < -80:
+                if (x,y-2) not in self.visited:
+                    self.notTaken.add((x,y-2))
+                    #self.add_dict((28+x,14-y+2), 'X')
+            # if walls[3] == 1 :
+            #     self.add_dict((28+x+1,14-y), '|')
+            # else:
+            #     self.add_dict((28+x+1,14-y), 'X')
+        elif compass==-90:
             if walls[0] == 1 :
-                #print('WALL FRONT - ',(28+x,14-y+1))
                 self.add_dict((28+x,14-y+1), '-')
             else: 
-                #print('FREE SPACE X ',(28+x,14-y+1))
                 self.add_dict((28+x,14-y+1), 'X')
             if walls[1] == 1 :
-                #print('WALL RIGHT | ',(28+x-1,14-y))
                 self.add_dict((28+x-1,14-y), '|')
             else: 
-                #print('FREE SPACE X ',(28+x-1,14-y))
                 self.add_dict((28+x-1,14-y), 'X')
+                if (x-2,y) not in self.visited:
+                    self.notTaken.add((x-2,y))
+                    #self.add_dict((28+x-2,14-y), 'X')
             if walls[2] == 1 :
-                #print('WALL LEFT | ',(28+x+1,14-y))
                 self.add_dict((28+x+1,14-y), '|')
             else: 
-                #print('FREE SPACE X ',(28+x+1,14-y))
                 self.add_dict((28+x+1,14-y), 'X')
-            if walls[3] == 1 :
-                #print('WALL BACK - ',(28+x,14-y-1))
-                self.add_dict((28+x,14-y-1), '-')
-            else: 
-                #print('FREE SPACE X ',(28+x,14-y-1))
-                self.add_dict((28+x,14-y-1), 'X')
+                if (x+2,y) not in self.visited:
+                    self.notTaken.add((x+2,y))
+                    #self.add_dict((28+x+2,14-y), 'X')
+            # if walls[3] == 1 :
+            #     self.add_dict((28+x,14-y-1), '-')
+            # else: 
+            #     self.add_dict((28+x,14-y-1), 'X')
 
-        #print('FREE SPACE X ',(28+x,14-y))
         self.add_dict((28+x,14-y), 'X')
+        if (x,y) in self.notTaken:
+            self.notTaken.remove((x,y))
 
         self.mapWriting()
-
-        # print(self.d)
-        # print('\n')
+        print("NOT TAKEN: ", self.notTaken)
         
     def checkwalls(self):
         center_id = 0
@@ -381,7 +369,6 @@ class MyRob(CRobLinkAngs):
         walls = [0,0,0,0]       # walls =[front, right, left, back]
 
         if self.measures.irSensor[center_id] >= 1.2 : 
-            #print("wall front")
             walls[0] = 1
         if self.measures.irSensor[right_id] >= 1.2 : 
             #print("wall right")
