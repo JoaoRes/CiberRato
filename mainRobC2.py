@@ -15,6 +15,7 @@ CELLCOLS=14
 class MyRob(CRobLinkAngs):
     visited = set()
     notTaken = set()
+    walls = set()
     posinitial = ()
     target = ()
     prevTarget = ()
@@ -24,6 +25,7 @@ class MyRob(CRobLinkAngs):
     d = {(28,14): 'I'}
     neighbors = [(0,2),(0,-2),(2,0),(-2,0)]
     path = []
+    dictionary_noTaken= dict()
 
     def __init__(self, rob_name, rob_id, angles, host):
         CRobLinkAngs.__init__(self, rob_name, rob_id, angles, host)
@@ -43,7 +45,7 @@ class MyRob(CRobLinkAngs):
             quit()
 
         state = 'stop'
-        stopped_state = 'go'
+        stopped_state = 'end'
 
         self.readSensors()
         while True:
@@ -69,19 +71,16 @@ class MyRob(CRobLinkAngs):
                 # print('MINHA POSICAO', self.mypos)
                 # print('TARGET',self.target)
                 # print('\n')
+
+                print(self.target)
                 if self.measures.ground==0:
                     self.setVisitingLed(True)
 
-                if self.target == ():
-                    if self.calculateTarget() in self.visited :
-                        state = 'Everything_visited'
-                    else:
-                        self.target = self.calculateTarget()
-                elif self.reached(self.mypos,self.target):
+                if self.reached(self.mypos,self.target):
                     self.prevTarget = self.target
                     self.visited.add(self.prevTarget)
-                    print("VISITED NODES", self.visited)
-                    print("NOT VISITED NODES", self.notTaken)
+                    # print("VISITED NODES", self.visited)
+                    # print("NOT VISITED NODES", self.notTaken)
                     state= 'end'
                 else:
                     # print('BUSSULA',self.measures.compass)
@@ -123,7 +122,6 @@ class MyRob(CRobLinkAngs):
                     # print(self.measures.compass)
                     self.driveMotors(-0.03,0.03)                
             if state == 'end':
-                self.target= ()
                 self.driveMotors(0,0)
                 # print('PAREDES ', self.checkwalls())
                 if self.checkwalls()[0]== 1:
@@ -138,28 +136,12 @@ class MyRob(CRobLinkAngs):
                         #  print(self.checkwalls())
                          state = 'rotate right' 
                 else:
+                    self.compass_orientation(self.checkwalls())
                     state = 'go'
                 
-            if state== 'Everything_visited':
-                list_notTaken = list (self.notTaken)
-                list_visited = list (self.visited)
-                for i, j in self.neighbors:
-                    neigh = (list_notTaken[0][0]+i, list_notTaken[0][1]+j)
-                    if neigh in list_visited:
-                        list_notTaken[0]= neigh 
-                print(list_visited)
-                print(self.prevTarget)
-                print(list_visited[0])
-                print(self.visited)
-                self.path = astar(list_visited, self.prevTarget, list_visited[0])
-                print(self.path)
-                
-                for i in self.path:
-                    if self.reached(self.prevTarget, i):
-                        state='go'
-                    else:
-                        self.straight(0.15,self.measures.compass,0.05,self.correctCompass())
-                        
+        
+
+
 
             
 
@@ -218,28 +200,35 @@ class MyRob(CRobLinkAngs):
     def add_dict(self, key, str):
         if key not in self.d:
             self.d[key] = str
+        if self.d[key] == '|' or self.d[key] == '-':
+            self.walls.add((key[0]-28,key[1]-14))
+        
+        #print("PAREDES" , self.walls)
 
     #checks compass orientation 
     def compass_orientation(self,walls):
         compass = self.correctCompass()
         (x, y) = (round(self.measures.x - self.posinitial[0]), round(self.measures.y - self.posinitial[1]))
+        tmp= [0,0,0] #[front, right, left]
 
         if compass==0:
             if walls[0] == 1 :
                 self.add_dict((28+x+1,14-y), '|')
             else: 
                 self.add_dict((28+x+1,14-y), 'X')
+                tmp[0]=(x+2,y)
             if walls[1] == 1 :
                 self.add_dict((28+x,14-y+1), '-')
             else: 
                 self.add_dict((28+x,14-y+1), 'X')
+                tmp[1]=(x,y-2)
                 if (x,y-2) not in self.visited:
-                    self.notTaken.add((x,y-2))
                     self.add_dict((28+x,14-y+2), 'X')
             if walls[2] == 1 :
                 self.add_dict((28+x,14-y-1), '-')
             else: 
                 self.add_dict((28+x,14-y-1), 'X')
+                tmp[2]=(x,y+2)
                 if (x,y+2) not in self.visited:
                     self.notTaken.add((x,y+2))
                     self.add_dict((28+x,14-y-2), 'X')
@@ -248,36 +237,40 @@ class MyRob(CRobLinkAngs):
                 self.add_dict((28+x,14-y-1), '-')
             else: 
                 self.add_dict((28+x,14-y-1), 'X')
+                tmp[0]=(x,y+2)
             if walls[1] == 1 :
                 self.add_dict((28+x+1,14-y), '|')
             else: 
                 self.add_dict((28+x+1,14-y), 'X')
+                tmp[1]=(x+2,y)
                 if (x+2,y) not in self.visited:
-                    self.notTaken.add((x+2,y))
                     self.add_dict((28+x+2,14-y), 'X')
             if walls[2] == 1 :
                 self.add_dict((28+x-1,14-y), '|')
             else: 
                 self.add_dict((28+x-1,14-y), 'X')
+                tmp[2]=(x-2,y)
                 if (x-2,y) not in self.visited:
                     self.notTaken.add((x-2,y))
                     self.add_dict((28+x-2,14-y), 'X')
-        elif compass==180:
+        elif compass==180 or compass == -180:
             if walls[0] == 1 :
                 self.add_dict((28+x-1,14-y), '|')
             else: 
                 self.add_dict((28+x-1,14-y), 'X')
+                tmp[0] = (x-2,y)
             if walls[1] == 1 :
                 self.add_dict((28+x,14-y-1), '-')
             else: 
                 self.add_dict((28+x,14-y-1), 'X')
+                tmp[1]= (x,y+2)
                 if (x,y+2) not in self.visited:
-                    self.notTaken.add((x,y+2))
                     self.add_dict((28+x,14-y-2), 'X')
             if walls[2] == 1 :
                 self.add_dict((28+x,14-y+1), '-')
             else: 
                 self.add_dict((28+x,14-y+1), 'X')
+                tmp[2]= (x,y-2)
                 if (x,y-2) not in self.visited:
                     self.notTaken.add((x,y-2))
                     self.add_dict((28+x,14-y+2), 'X')
@@ -286,27 +279,61 @@ class MyRob(CRobLinkAngs):
                 self.add_dict((28+x,14-y+1), '-')
             else: 
                 self.add_dict((28+x,14-y+1), 'X')
+                tmp[0]=(x,y-2)
+                print("ESTOU AQUI ", tmp[0])
             if walls[1] == 1 :
                 self.add_dict((28+x-1,14-y), '|')
             else: 
                 self.add_dict((28+x-1,14-y), 'X')
+                tmp[1]=(x-2,y)
                 if (x-2,y) not in self.visited:
-                    self.notTaken.add((x-2,y))
                     self.add_dict((28+x-2,14-y), 'X')
             if walls[2] == 1 :
                 self.add_dict((28+x+1,14-y), '|')
             else: 
                 self.add_dict((28+x+1,14-y), 'X')
+                tmp[2]=(x+2,y)
                 if (x+2,y) not in self.visited:
-                    self.notTaken.add((x+2,y))
                     self.add_dict((28+x+2,14-y), 'X')
+
+        self.dictionary_noTaken[self.prevTarget] = set()
+
+        if tmp[0] != 0 and tmp[0] not in self.visited:
+            self.target = tmp[0]
+            self.visited.add(tmp[0])
+            if tmp[1] != 0 and tmp[1] not in self.visited:
+                self.dictionary_noTaken[self.prevTarget].add(tmp[1])
+            if tmp[2] != 0 and tmp[2] not in self.visited:
+                self.dictionary_noTaken[self.prevTarget].add(tmp[2])
+        elif tmp[1] != 0 and tmp[1] not in self.visited:
+            self.target = tmp[1]
+            self.visited.add(tmp[1])
+            if tmp[2] != 0 and tmp[2] not in self.visited:
+                print("debug")
+                self.dictionary_noTaken[self.prevTarget].add(tmp[2])
+        elif tmp[2]!= 0 and tmp[2] not in self.visited:
+            self.target = tmp[2]
+            self.visited.add(tmp[2])
+        else:
+            neigh = (None, None)
+            n = float('inf')
+            for p in self.dictionary_noTaken.key():
+                r = heuristic(self.prevTarget,p)
+                if r < n :
+                    neigh = p
+            
+            self.path= astar(self.prevTarget,neigh,self.visited,self.walls)
+            print("CAMINHO", self.path)
+        
+        print("not taken", self.dictionary_noTaken)
+        
 
         self.add_dict((28+x,14-y), 'X')
         if (x,y) in self.notTaken:
             self.notTaken.remove((x,y))
         if (x,y) == (-2,0):
             self.mapWriting()
-        print("NOT TAKEN: ", self.notTaken)
+        #print("NOT TAKEN: ", self.notTaken)
         
     def checkwalls(self):
         center_id = 0
@@ -328,7 +355,6 @@ class MyRob(CRobLinkAngs):
             #print("wall back")
             walls[3]=1
         
-        self.compass_orientation(walls)
         #print(walls)
         return walls
 
