@@ -5,6 +5,7 @@ from typing import DefaultDict
 from croblink import *
 from math import *
 import xml.etree.ElementTree as ET
+from astar import *
 
 CELLROWS=7
 CELLCOLS=14
@@ -21,6 +22,8 @@ class MyRob(CRobLinkAngs):
     myorient = ()
     nextorient = ()
     d = {(28,14): 'I'}
+    neighbors = [(0,2),(0,-2),(2,0),(-2,0)]
+    path = []
 
     def __init__(self, rob_name, rob_id, angles, host):
         CRobLinkAngs.__init__(self, rob_name, rob_id, angles, host)
@@ -70,8 +73,10 @@ class MyRob(CRobLinkAngs):
                     self.setVisitingLed(True)
 
                 if self.target == ():
-                    self.calculateTarget()
-                    self.searchUnknown()
+                    if self.calculateTarget() in self.visited :
+                        state = 'Everything_visited'
+                    else:
+                        self.target = self.calculateTarget()
                 elif self.reached(self.mypos,self.target):
                     self.prevTarget = self.target
                     self.visited.add(self.prevTarget)
@@ -135,86 +140,45 @@ class MyRob(CRobLinkAngs):
                 else:
                     state = 'go'
                 
-    # def calculatePossibleTargets(self):
-    #     walls = self.checkwalls()
+            if state== 'Everything_visited':
+                list_notTaken = list (self.notTaken)
+                list_visited = list (self.visited)
+                for i, j in self.neighbors:
+                    neigh = (list_notTaken[0][0]+i, list_notTaken[0][1]+j)
+                    if neigh in list_visited:
+                        list_notTaken[0]= neigh 
+                print(list_visited)
+                print(self.prevTarget)
+                print(list_visited[0])
+                print(self.visited)
+                self.path = astar(list_visited, self.prevTarget, list_visited[0])
+                print(self.path)
+                
+                for i in self.path:
+                    if self.reached(self.prevTarget, i):
+                        state='go'
+                    else:
+                        self.straight(0.15,self.measures.compass,0.05,self.correctCompass())
+                        
 
-    #     if walls == [0,1,0,0]:
-    #         self.target = self.calculateTarget()
-    #         self.notTaken.add(self.calculateTarget())
-    #     if walls == [0,1,1,0]:
-    #         self.target = self.calculateTarget()
-    #     if walls == [0,0,1,0]:
-    #         self.target = self.calculateTarget()
-    #         self.notTaken.add(self.calculateTarget())    
-    #     if walls == [0,0,0,0]:
-    #         self.target = self.calculateTarget()
-    #         self.notTaken.add(self.calculateTarget())
-    #         self.notTaken.add(self.calculateTarget())
-    #     if walls == [1,0,0,0]:
-    #         self.target= self.calculateTarget()
-    #         self.notTaken.add(self.calculateTarget())
-    #     if walls == [1,1,0,0]:
-    #         self.target= self.calculateTarget()
-    #     if walls == [1,0,1,0]:
-    #         self.target= self.calculateTarget
-    #     if walls == [0,1,0,1]:
-    #         self.target = self.calculateTarget()
-    #         self.notTaken.add(self.calculateTarget())
-    #     if walls == [0,1,1,1]:
-    #         self.target = self.calculateTarget()
-    #     if walls == [0,0,1,1]:
-    #         self.target = self.calculateTarget()
-    #         self.notTaken.add(self.calculateTarget())    
-    #     if walls == [0,0,0,1]:
-    #         self.target = self.calculateTarget()
-    #         self.notTaken.add(self.calculateTarget())
-    #         self.notTaken.add(self.calculateTarget())
-    #     if walls == [1,0,0,1]:
-    #         self.target= self.calculateTarget()
-    #         self.notTaken.add(self.calculateTarget())
-    #     if walls == [1,1,0,1]:
-    #         self.target= self.calculateTarget()
-    #     if walls == [1,0,1,1]:
-    #         self.target= self.calculateTarget
             
-    
-    def searchUnknown(self):
-
-        center_id = 0
-        left_id = 1
-        right_id = 2
-        back_id = 3
-        current = self.correctCompass()
-        entries = []
-
-        if current == 0:
-            if self.measures.irSensor[center_id] <= 1.2:
-                entries.append((self.prevTarget[0]+2,self.prevTarget[1]))
-            if self.measures.irSensor[left_id] <= 1.2:
-                entries.append((self.prevTarget[0],self.prevTarget[1]+2))
-            if self.measures.irSensor[right_id] <= 1.2:
-                entries.append((self.prevTarget[0],self.prevTarget[1]-2))
-
-        for entry in entries:
-            if entry not in self.visited:
-                self.notTaken.add(entry)
 
     def calculateTarget(self):
         # print('ESTOU A CALCULAR')
         if self.correctCompass()== 0:
             # print('PREVIOUS TARGET',self.prevTarget)
-            self.target = (self.prevTarget[0]+2, self.prevTarget[1])
-            if self.target in self.notTaken:
-                self.notTaken.discard(self.target)
+            target = (self.prevTarget[0]+2, self.prevTarget[1])
         elif self.correctCompass()== 90:
             # print('PREVIOUS TARGET',self.prevTarget)
-            self.target = (self.prevTarget[0], self.prevTarget[1]+2)
+            target = (self.prevTarget[0], self.prevTarget[1]+2)
         elif self.correctCompass()== -90:
             # print('PREVIOUS TARGET',self.prevTarget)
-            self.target = (self.prevTarget[0], self.prevTarget[1]-2)
+            target = (self.prevTarget[0], self.prevTarget[1]-2)
         elif self.correctCompass()== 180 or self.correctCompass()== -180:
             # print('PREVIOUS TARGET',self.prevTarget)
-            self.target = (self.prevTarget[0]-2, self.prevTarget[1])  
+            target = (self.prevTarget[0]-2, self.prevTarget[1]) 
+        
+        return target
         
 
     def straight(self, linear, m, k, ref):
@@ -271,18 +235,14 @@ class MyRob(CRobLinkAngs):
                 self.add_dict((28+x,14-y+1), 'X')
                 if (x,y-2) not in self.visited:
                     self.notTaken.add((x,y-2))
-                    #self.add_dict((28+x,14-y+2), 'X')
+                    self.add_dict((28+x,14-y+2), 'X')
             if walls[2] == 1 :
                 self.add_dict((28+x,14-y-1), '-')
             else: 
                 self.add_dict((28+x,14-y-1), 'X')
                 if (x,y+2) not in self.visited:
                     self.notTaken.add((x,y+2))
-                    #self.add_dict((28+x,14-y-2), 'X')
-            # if walls[3] == 1 :
-            #     self.add_dict((28+x-1,14-y), '|')
-            # else: 
-            #     self.add_dict((28+x-1,14-y), 'X')   
+                    self.add_dict((28+x,14-y-2), 'X')
         elif compass==90:
             if walls[0] == 1 :
                 self.add_dict((28+x,14-y-1), '-')
@@ -294,18 +254,14 @@ class MyRob(CRobLinkAngs):
                 self.add_dict((28+x+1,14-y), 'X')
                 if (x+2,y) not in self.visited:
                     self.notTaken.add((x+2,y))
-                    #self.add_dict((28+x+2,14-y), 'X')
+                    self.add_dict((28+x+2,14-y), 'X')
             if walls[2] == 1 :
                 self.add_dict((28+x-1,14-y), '|')
             else: 
                 self.add_dict((28+x-1,14-y), 'X')
                 if (x-2,y) not in self.visited:
                     self.notTaken.add((x-2,y))
-                    #self.add_dict((28+x-2,14-y), 'X')
-            # if walls[3] == 1 :
-            #     self.add_dict((28+x,14-y+1), '-')
-            # else: 
-            #     self.add_dict((28+x,14-y+1), 'X')
+                    self.add_dict((28+x-2,14-y), 'X')
         elif compass==180:
             if walls[0] == 1 :
                 self.add_dict((28+x-1,14-y), '|')
@@ -317,18 +273,14 @@ class MyRob(CRobLinkAngs):
                 self.add_dict((28+x,14-y-1), 'X')
                 if (x,y+2) not in self.visited:
                     self.notTaken.add((x,y+2))
-                    #self.add_dict((28+x,14-y-2), 'X')
+                    self.add_dict((28+x,14-y-2), 'X')
             if walls[2] == 1 :
                 self.add_dict((28+x,14-y+1), '-')
             else: 
                 self.add_dict((28+x,14-y+1), 'X')
                 if (x,y-2) not in self.visited:
                     self.notTaken.add((x,y-2))
-                    #self.add_dict((28+x,14-y+2), 'X')
-            # if walls[3] == 1 :
-            #     self.add_dict((28+x+1,14-y), '|')
-            # else:
-            #     self.add_dict((28+x+1,14-y), 'X')
+                    self.add_dict((28+x,14-y+2), 'X')
         elif compass==-90:
             if walls[0] == 1 :
                 self.add_dict((28+x,14-y+1), '-')
@@ -340,24 +292,20 @@ class MyRob(CRobLinkAngs):
                 self.add_dict((28+x-1,14-y), 'X')
                 if (x-2,y) not in self.visited:
                     self.notTaken.add((x-2,y))
-                    #self.add_dict((28+x-2,14-y), 'X')
+                    self.add_dict((28+x-2,14-y), 'X')
             if walls[2] == 1 :
                 self.add_dict((28+x+1,14-y), '|')
             else: 
                 self.add_dict((28+x+1,14-y), 'X')
                 if (x+2,y) not in self.visited:
                     self.notTaken.add((x+2,y))
-                    #self.add_dict((28+x+2,14-y), 'X')
-            # if walls[3] == 1 :
-            #     self.add_dict((28+x,14-y-1), '-')
-            # else: 
-            #     self.add_dict((28+x,14-y-1), 'X')
+                    self.add_dict((28+x+2,14-y), 'X')
 
         self.add_dict((28+x,14-y), 'X')
         if (x,y) in self.notTaken:
             self.notTaken.remove((x,y))
-
-        self.mapWriting()
+        if (x,y) == (-2,0):
+            self.mapWriting()
         print("NOT TAKEN: ", self.notTaken)
         
     def checkwalls(self):
@@ -368,15 +316,15 @@ class MyRob(CRobLinkAngs):
         
         walls = [0,0,0,0]       # walls =[front, right, left, back]
 
-        if self.measures.irSensor[center_id] >= 1.2 : 
+        if self.measures.irSensor[center_id] >= 1.2: 
             walls[0] = 1
-        if self.measures.irSensor[right_id] >= 1.2 : 
+        if self.measures.irSensor[right_id] >= 1.2: 
             #print("wall right")
             walls[1] = 1
-        if self.measures.irSensor[left_id] >= 1.2 : 
+        if self.measures.irSensor[left_id] >= 1.2: 
             #print("wall left")
             walls[2]=1
-        if self.measures.irSensor[back_id] >= 1.2 : 
+        if self.measures.irSensor[back_id] >= 1.2: 
             #print("wall back")
             walls[3]=1
         
