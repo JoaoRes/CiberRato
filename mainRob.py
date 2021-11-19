@@ -1,4 +1,3 @@
-
 import sys
 from croblink import *
 from math import *
@@ -61,7 +60,8 @@ class MyRob(CRobLinkAngs):
                 if self.measures.returningLed==True:
                     self.setReturningLed(False)
                 self.wander()
-    
+            
+
     def wander(self):
         center_id = 0
         left_id = 1
@@ -71,32 +71,34 @@ class MyRob(CRobLinkAngs):
         lin = 0
         rot = 0
 
-        if  self.measures.irSensor[center_id] > 4.7:
+        if  self.measures.irSensor[center_id] > 4.8:
             if self.measures.irSensor[left_id] > self.measures.irSensor[right_id]:
                 rot = -0.15
             elif self.measures.irSensor[left_id] < self.measures.irSensor[right_id]:
                 rot = 0.15
             lin = 0
-        elif 0.7 < self.measures.irSensor[center_id] < 4.7:
-
-            if self.measures.irSensor[left_id] < self.measures.irSensor[right_id] and self.measures.irSensor[left_id]<3.4:
+        elif 0.5 < self.measures.irSensor[center_id] < 4.8:
+            if self.measures.irSensor[left_id] > 2.17 :
+                rot = -0.05 * self.measures.irSensor[left_id]
+            elif self.measures.irSensor[right_id] > 2.17  :
+                rot = 0.05 * self.measures.irSensor[right_id]
+            elif self.measures.irSensor[left_id]<self.measures.irSensor[right_id]:
                 rot = 0.15
-                
-            elif self.measures.irSensor[left_id]>self.measures.irSensor[right_id] and self.measures.irSensor[right_id]<3.4:
-                rot = -0.15
-                
+            elif self.measures.irSensor[left_id]>self.measures.irSensor[right_id]:
+                rot = -0.15   
             else:
                 rot = 0
-            lin = 0.12
+            lin = 0.15/self.measures.irSensor[center_id]
         else:
-            lin = 0.13
+            lin = 0.15
             rot = 0
         
             
         left = lin - rot
-        right = lin + rot 
+        right = lin + rot
 
         self.driveMotors(left,right)
+
 class Map():
     def __init__(self, filename):
         tree = ET.parse(filename)
