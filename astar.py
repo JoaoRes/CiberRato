@@ -1,7 +1,8 @@
 from heapq import *
+from math import dist
 
-def heuristic(a, b):
-    return (b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2
+#dist used as heuristic
+
 
 def astar(start, goal,array,walls):
 
@@ -10,7 +11,7 @@ def astar(start, goal,array,walls):
     close_set = set()
     came_from = {}
     gscore = {start:0}
-    fscore = {start:heuristic(start, goal)}
+    fscore = {start:dist(start, goal)}
     oheap = []
 
     heappush(oheap, (fscore[start], start))
@@ -30,7 +31,7 @@ def astar(start, goal,array,walls):
         close_set.add(current)
         for i, j in neighbors:
             neighbor = current[0] + i, current[1] + j            
-            tentative_g_score = gscore[current] + heuristic(current, neighbor)
+            tentative_g_score = gscore[current] + dist(current, neighbor)
             
             if neighbor not in array:
                 continue
@@ -52,7 +53,7 @@ def astar(start, goal,array,walls):
             if  tentative_g_score < gscore.get(neighbor, 0) or neighbor not in [i[1]for i in oheap]:
                 came_from[neighbor] = current
                 gscore[neighbor] = tentative_g_score
-                fscore[neighbor] = tentative_g_score + heuristic(neighbor, goal)
+                fscore[neighbor] = tentative_g_score + dist(neighbor, goal)
                 heappush(oheap, (fscore[neighbor], neighbor))
            
     return None

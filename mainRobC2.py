@@ -412,6 +412,7 @@ class MyRob(CRobLinkAngs):
 
             print("LENGTH DICIONARIO -> " , len(self.dictionary_noTaken)   )
 
+
             neigh = min(self.dictionary_noTaken,key=lambda point : hypot(self.prevTarget[1]-point[1], self.prevTarget[0]-point[0]))
             
             print("SOU O NEIGHBOR", neigh)
