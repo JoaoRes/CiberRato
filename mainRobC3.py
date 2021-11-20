@@ -1,7 +1,7 @@
 
 from os import write
 import sys
-from typing import DefaultDict, List
+from typing import DefaultDict
 from croblink import *
 from math import *
 import xml.etree.ElementTree as ET
@@ -28,7 +28,7 @@ class MyRob(CRobLinkAngs):
     path = list()
     dictionary_noTaken= dict()
     havepath = False
-    list = list()
+    aux = ()
 
     def __init__(self, rob_name, rob_id, angles, host):
         CRobLinkAngs.__init__(self, rob_name, rob_id, angles, host)
@@ -427,12 +427,7 @@ class MyRob(CRobLinkAngs):
         print("not taken", self.dictionary_noTaken)
         if self.measures.ground != -1: 
             self.d[(x+28,14-y)] = 'O'
-            aux = (x+28,14-y)
-            self.list = astar(self.posinitial,aux,self.visited,self.walls)
-            print("--------------------------------------")
-            print(self.list.pop())
-            print(self.list)
-            print("--------------------------------------")
+            
         else:
             self.add_dict((28+x,14-y), 'X')
 
