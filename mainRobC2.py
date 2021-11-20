@@ -102,13 +102,14 @@ class MyRob(CRobLinkAngs):
                     else:
                         self.nextorient = self.myorient-90
                     # print("OBJETIVO", self.nextorient)
-                elif abs(self.measures.compass - self.nextorient) <= 5:
+                elif abs(self.measures.compass - self.nextorient) <=5:
                     self.myorient= self.nextorient
                     self.nextorient = ()
                     state = 'end'
                 else:
                     # print(self.measures.compass)
-                    self.driveMotors(0.05,-0.05)
+                    self.driveMotors(0.07,-0.07)
+                    
             if state == 'rotate left':
                 if self.nextorient == ():
                     if self.correctCompass() == 180 or self.correctCompass() == -180: 
@@ -116,13 +117,14 @@ class MyRob(CRobLinkAngs):
                     else:
                         self.nextorient = self.myorient+90
                     # print("OBJETIVO", self.nextorient)
-                elif abs(self.measures.compass - self.nextorient) <=5:
+                elif abs(self.measures.compass - self.nextorient) <=5 :
                     self.myorient= self.nextorient
                     self.nextorient = ()
                     state = 'end'
                 else:
                     # print(self.measures.compass)
-                    self.driveMotors(-0.05,0.05)                
+                    self.driveMotors(-0.07,0.07)                
+                    
             if state == 'end':
                 self.driveMotors(0,0)
                 if self.calculate== True:
