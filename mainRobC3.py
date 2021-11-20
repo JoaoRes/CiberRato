@@ -28,6 +28,7 @@ class MyRob(CRobLinkAngs):
     path = list()
     dictionary_noTaken= dict()
     havepath = False
+    aux = ()
 
     def __init__(self, rob_name, rob_id, angles, host):
         CRobLinkAngs.__init__(self, rob_name, rob_id, angles, host)
@@ -102,14 +103,13 @@ class MyRob(CRobLinkAngs):
                     else:
                         self.nextorient = self.myorient-90
                     # print("OBJETIVO", self.nextorient)
-                elif abs(self.measures.compass - self.nextorient) <=5:
+                elif abs(self.measures.compass - self.nextorient) <= 5:
                     self.myorient= self.nextorient
                     self.nextorient = ()
                     state = 'end'
                 else:
                     # print(self.measures.compass)
-                    self.driveMotors(0.07,-0.07)
-                    
+                    self.driveMotors(0.05,-0.05)
             if state == 'rotate left':
                 if self.nextorient == ():
                     if self.correctCompass() == 180 or self.correctCompass() == -180: 
@@ -117,14 +117,13 @@ class MyRob(CRobLinkAngs):
                     else:
                         self.nextorient = self.myorient+90
                     # print("OBJETIVO", self.nextorient)
-                elif abs(self.measures.compass - self.nextorient) <=5 :
+                elif abs(self.measures.compass - self.nextorient) <=5:
                     self.myorient= self.nextorient
                     self.nextorient = ()
                     state = 'end'
                 else:
                     # print(self.measures.compass)
-                    self.driveMotors(-0.07,0.07)                
-                    
+                    self.driveMotors(-0.05,0.05)                
             if state == 'end':
                 self.driveMotors(0,0)
                 if self.calculate== True:
@@ -426,9 +425,12 @@ class MyRob(CRobLinkAngs):
             print("CAMINHO", self.path)
         
         print("not taken", self.dictionary_noTaken)
-        
+        if self.measures.ground != -1: 
+            self.d[(x+28,14-y)] = 'O'
+            
+        else:
+            self.add_dict((28+x,14-y), 'X')
 
-        self.add_dict((28+x,14-y), 'X')
         if (x,y) in self.notTaken:
             self.notTaken.remove((x,y))
             
