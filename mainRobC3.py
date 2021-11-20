@@ -28,7 +28,7 @@ class MyRob(CRobLinkAngs):
     path = list()
     dictionary_noTaken= dict()
     havepath = False
-    aux = ()
+    goals = [0,0,0]
 
     def __init__(self, rob_name, rob_id, angles, host):
         CRobLinkAngs.__init__(self, rob_name, rob_id, angles, host)
@@ -55,6 +55,16 @@ class MyRob(CRobLinkAngs):
             self.readSensors()
             if self.measures.endLed:
                 print(self.robName + " exiting")
+                aux1 = astar((0,0),self.goals[0],self.visited,self.walls)
+                aux2 = astar(self.goals[0],self.goals[1],self.visited,self.walls)
+                aux3 = astar(self.goals[1],(0,0),self.visited,self.walls)
+                file= open("path.txt", 'w')
+                finPath = aux3+aux2+aux1
+                file.write('(0, 0)')
+                file.write('\n')
+                for i in reversed(finPath):
+                    file.write(str(i))
+                    file.write('\n')
                 quit()
 
             if state == 'stop' and self.measures.start:
@@ -109,7 +119,7 @@ class MyRob(CRobLinkAngs):
                     state = 'end'
                 else:
                     # print(self.measures.compass)
-                    self.driveMotors(0.05,-0.05)
+                    self.driveMotors(0.07,-0.07)
             if state == 'rotate left':
                 if self.nextorient == ():
                     if self.correctCompass() == 180 or self.correctCompass() == -180: 
@@ -123,7 +133,7 @@ class MyRob(CRobLinkAngs):
                     state = 'end'
                 else:
                     # print(self.measures.compass)
-                    self.driveMotors(-0.05,0.05)                
+                    self.driveMotors(-0.07,0.07)                
             if state == 'end':
                 self.driveMotors(0,0)
                 if self.calculate== True:
@@ -425,9 +435,21 @@ class MyRob(CRobLinkAngs):
             print("CAMINHO", self.path)
         
         print("not taken", self.dictionary_noTaken)
-        if self.measures.ground != -1: 
+        if self.measures.ground == 1: 
             self.d[(x+28,14-y)] = 'O'
             
+            self.goals[0] = (x,y)
+            # print("POSIÇAO INICIAL", self.posinitial)
+            # print("POSIÇAO AUX", self.aux)
+            # print("VISITADOS -> " ,self.visited)
+            # print("PAREDES -> ",  self.walls)
+            # teste = astar((0,0),self.aux,self.visited,self.walls)
+            # print("--------------------------------------")
+            # print(teste)
+            # print("--------------------------------------")
+        elif self.measures.ground == 2:
+            self.d[(x+28,14-y)] = 'O'
+            self.goals[1] = (x,y)
         else:
             self.add_dict((28+x,14-y), 'X')
 
