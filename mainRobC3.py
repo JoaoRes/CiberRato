@@ -424,9 +424,11 @@ class MyRob(CRobLinkAngs):
             print("CAMINHO", self.path)
         
         print("not taken", self.dictionary_noTaken)
-        
+        if self.measures.ground != -1: 
+            self.d[(x+28,14-y)] = 'O'
+        else:
+            self.add_dict((28+x,14-y), 'X')
 
-        self.add_dict((28+x,14-y), 'X')
         if (x,y) in self.notTaken:
             self.notTaken.remove((x,y))
             
