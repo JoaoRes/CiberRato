@@ -66,7 +66,6 @@ class MyRob(CRobLinkAngs):
         center_id = 0
         left_id = 1
         right_id = 2
-        back_id = 3
 
         lin = 0
         rot = 0
@@ -77,8 +76,8 @@ class MyRob(CRobLinkAngs):
             elif self.measures.irSensor[left_id] < self.measures.irSensor[right_id]:
                 rot = 0.15
             lin = 0
-        elif 0.5 < self.measures.irSensor[center_id] < 4.8:
-            if self.measures.irSensor[left_id] > 2.17 :
+        elif 0.4 < self.measures.irSensor[center_id] < 4.8:
+            if self.measures.irSensor[left_id] > 2.17:
                 rot = -0.05 * self.measures.irSensor[left_id]
             elif self.measures.irSensor[right_id] > 2.17  :
                 rot = 0.05 * self.measures.irSensor[right_id]
@@ -137,11 +136,9 @@ for i in range(1, len(sys.argv),2):
         host = sys.argv[i + 1]
     elif (sys.argv[i] == "--pos" or sys.argv[i] == "-p") and i != len(sys.argv) - 1:
         pos = int(sys.argv[i + 1])
-    elif (sys.argv[i] == "--robname" or sys.argv[i] == "-r") and i != len(sys.argv) - 1:
+    elif (sys.argv[i] == "--robname" or sys.argv[i] == "-p") and i != len(sys.argv) - 1:
         rob_name = sys.argv[i + 1]
     elif (sys.argv[i] == "--map" or sys.argv[i] == "-m") and i != len(sys.argv) - 1:
-        mapc = Map(sys.argv[i + 1])
-    elif (sys.argv[i] == "--file" or sys.argv[i] == "-f") and i != len(sys.argv) - 1:
         mapc = Map(sys.argv[i + 1])
     else:
         print("Unkown argument", sys.argv[i])
