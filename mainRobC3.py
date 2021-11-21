@@ -65,15 +65,21 @@ class MyRob(CRobLinkAngs):
                     aux.append(i)
                 perm = list(permutations(aux))
                 finPath= []
+                firstP = []
                 for i in perm:
                     aux1 = astar((0,0),g[i[0]],self.visited,self.walls)
+                    aux2 = aux1.copy()
                     old = g[i[0]]
                     for j in range(1,len(i)):
                         aux1 = astar(old,g[i[j]],self.visited,self.walls) + aux1
                         old = g[i[j]]
                     aux1 = astar(old,(0,0),self.visited,self.walls) + aux1
                     if len(finPath)==0 or len(finPath) > len(aux1):
-                        finPath = aux1.copy()
+                            firstP = aux2.copy()
+                            finPath = aux1.copy()
+                    elif len(finPath)==len(aux1) and (len(firstP)==0 or len(firstP)>=len(aux2)):
+                            firstP = aux2.copy()
+                            finPath = aux1.copy()
                 
                 file= open("path.txt", 'w')
                 file.write('0 0')
