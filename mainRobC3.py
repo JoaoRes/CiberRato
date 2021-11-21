@@ -81,7 +81,7 @@ class MyRob(CRobLinkAngs):
                             firstP = aux2.copy()
                             finPath = aux1.copy()
                 
-                file= open("path.txt", 'w')
+                file= open("path.out", 'w')
                 file.write('0 0')
                 file.write('\n')
                 for i in reversed(finPath):
@@ -138,13 +138,14 @@ class MyRob(CRobLinkAngs):
                     else:
                         self.nextorient = self.myorient-90
                     # print("OBJETIVO", self.nextorient)
-                elif abs(self.measures.compass - self.nextorient) <= 5:
+                elif abs(self.measures.compass - self.nextorient) <=10:
                     self.myorient= self.nextorient
                     self.nextorient = ()
                     state = 'end'
                 else:
                     # print(self.measures.compass)
-                    self.driveMotors(0.07,-0.07)
+                    self.driveMotors(0.1,-0.1)
+                    
             if state == 'rotate left':
                 if self.nextorient == ():
                     if self.correctCompass() == 180 or self.correctCompass() == -180: 
@@ -152,13 +153,14 @@ class MyRob(CRobLinkAngs):
                     else:
                         self.nextorient = self.myorient+90
                     # print("OBJETIVO", self.nextorient)
-                elif abs(self.measures.compass - self.nextorient) <=5:
+                elif abs(self.measures.compass - self.nextorient) <=10 :
                     self.myorient= self.nextorient
                     self.nextorient = ()
                     state = 'end'
                 else:
                     # print(self.measures.compass)
-                    self.driveMotors(-0.07,0.07)                
+                    self.driveMotors(-0.1,0.1)                
+                    
             if state == 'rotate mazespin':
                 # print("ESTOU A RODAR")
                 if self.nextorient == ():
@@ -172,13 +174,13 @@ class MyRob(CRobLinkAngs):
                     else: 
                         self.nextorient=0
                     
-                elif abs(self.measures.compass - self.nextorient) <= 5:
+                elif abs(self.measures.compass - self.nextorient) <= 10:
                     self.myorient= self.nextorient
                     self.nextorient = ()
                     state = 'end'
                 else:
                     # print(self.measures.compass)
-                    self.driveMotors(0.07,-0.07)
+                    self.driveMotors(0.1,-0.1)
             if state == 'end':
                 self.driveMotors(0,0)
                 if self.calculate== True:
@@ -322,11 +324,11 @@ class MyRob(CRobLinkAngs):
 
     
     def correctCompass(self):
-        if -10 < self.measures.compass < 10:
+        if -15 < self.measures.compass < 15:
             return 0
-        elif 80 < self.measures.compass< 100:
+        elif 75 < self.measures.compass< 105:
             return 90
-        elif -100 < self.measures.compass <-80:
+        elif -105 < self.measures.compass <-75:
             return -90
         elif self.measures.compass <= -170 or self.measures.compass >= 170:  
             return 180 * self.measures.compass / abs(self.measures.compass)
@@ -457,11 +459,15 @@ class MyRob(CRobLinkAngs):
             self.target = tmp[2]
             self.visited.add(tmp[2])
         else:
+            array= []
             for i in self.dictionary_noTaken.keys():
                 if len(self.dictionary_noTaken[i]) == 0:
                     array.append(i)
+                if self.prevTarget in self.dictionary_noTaken[i]:
+                    self.dictionary_noTaken[i].discard(self.prevTarget)
             for i in array:
                 self.dictionary_noTaken.pop(i)
+
             
             if len(self.dictionary_noTaken.keys()) == 0:
                 print("MESTRE DA CULINARIA")
