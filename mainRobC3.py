@@ -28,7 +28,7 @@ class MyRob(CRobLinkAngs):
     path = list()
     dictionary_noTaken= dict()
     havepath = False
-    goals = [0,0,0]
+    goals = []
 
     def __init__(self, rob_name, rob_id, angles, host):
         CRobLinkAngs.__init__(self, rob_name, rob_id, angles, host)
@@ -56,14 +56,19 @@ class MyRob(CRobLinkAngs):
             if self.measures.endLed:
                 print(self.robName + " exiting")
                 aux1 = astar((0,0),self.goals[0],self.visited,self.walls)
-                aux2 = astar(self.goals[0],self.goals[1],self.visited,self.walls)
-                aux3 = astar(self.goals[1],(0,0),self.visited,self.walls)
+                aux2=[]
+                for i in range(0,len(self.goals)-1):
+                    aux2 = aux2 + astar(self.goals[i],self.goals[i+1],self.visited,self.walls)
+                aux3 = astar(self.goals[-1],(0,0),self.visited,self.walls)
                 file= open("path.txt", 'w')
                 finPath = aux3+aux2+aux1
-                file.write('(0, 0)')
+                file.write('0 0')
                 file.write('\n')
                 for i in reversed(finPath):
-                    file.write(str(i))
+                    file.write(str(i[0]) + " "+ str(i[1]))
+                    if (i[0], i[1]) in self.goals:
+                        num = self.goals.index((i[0], i[1]))+1
+                        file.write(' #'+str(num))
                     file.write('\n')
                 quit()
 
@@ -435,21 +440,9 @@ class MyRob(CRobLinkAngs):
             print("CAMINHO", self.path)
         
         print("not taken", self.dictionary_noTaken)
-        if self.measures.ground == 1: 
+        if self.measures.ground > 0: 
             self.d[(x+28,14-y)] = 'O'
-            
-            self.goals[0] = (x,y)
-            # print("POSIÇAO INICIAL", self.posinitial)
-            # print("POSIÇAO AUX", self.aux)
-            # print("VISITADOS -> " ,self.visited)
-            # print("PAREDES -> ",  self.walls)
-            # teste = astar((0,0),self.aux,self.visited,self.walls)
-            # print("--------------------------------------")
-            # print(teste)
-            # print("--------------------------------------")
-        elif self.measures.ground == 2:
-            self.d[(x+28,14-y)] = 'O'
-            self.goals[1] = (x,y)
+            self.goals.append((x,y))
         else:
             self.add_dict((28+x,14-y), 'X')
 
@@ -483,7 +476,7 @@ class MyRob(CRobLinkAngs):
         return walls
 
     def mapWriting(self):
-        file= open("mapping.txt", 'w')    
+        file= open("mappingC3.txt", 'w')    
         for i in range(1,28):
             for j in range(1,56):
                 if (j,i) in self.d:
