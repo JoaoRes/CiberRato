@@ -6,6 +6,7 @@ from croblink import *
 from math import *
 import xml.etree.ElementTree as ET
 from astar import *
+from itertools import permutations
 
 CELLROWS=7
 CELLCOLS=14
@@ -28,7 +29,7 @@ class MyRob(CRobLinkAngs):
     path = list()
     dictionary_noTaken= dict()
     havepath = False
-    goals = []
+    goals = {}
 
     def __init__(self, rob_name, rob_id, angles, host):
         CRobLinkAngs.__init__(self, rob_name, rob_id, angles, host)
@@ -55,23 +56,34 @@ class MyRob(CRobLinkAngs):
             self.readSensors()
             if self.measures.endLed:
                 print(self.robName + " exiting")
-                aux1 = astar((0,0),self.goals[0],self.visited,self.walls)
-                aux2=[]
-                for i in range(0,len(self.goals)-1):
-                    aux2 = aux2 + astar(self.goals[i],self.goals[i+1],self.visited,self.walls)
-                aux3 = astar(self.goals[-1],(0,0),self.visited,self.walls)
+                (x, y) = (round(self.measures.x - self.posinitial[0]), round(self.measures.y - self.posinitial[1]))
+                if self.measures.ground != -1 and (x,y)!=(0,0): 
+                    self.goals[(x,y)] = self.measures.ground
+                g = list(self.goals.keys())
+                aux = []
+                for i in range(0,len(g)):
+                    aux.append(i)
+                perm = list(permutations(aux))
+                finPath= []
+                for i in perm:
+                    aux1 = astar((0,0),g[i[0]],self.visited,self.walls)
+                    old = g[i[0]]
+                    for j in range(1,len(i)):
+                        aux1 = astar(old,g[i[j]],self.visited,self.walls) + aux1
+                        old = g[i[j]]
+                    aux1 = astar(old,(0,0),self.visited,self.walls) + aux1
+                    if len(finPath)==0 or len(finPath) > len(aux1):
+                        finPath = aux1.copy()
+                
                 file= open("path.txt", 'w')
-                finPath = aux3+aux2+aux1
                 file.write('0 0')
                 file.write('\n')
                 for i in reversed(finPath):
                     file.write(str(i[0]) + " "+ str(i[1]))
-                    if (i[0], i[1]) in self.goals:
-                        num = self.goals.index((i[0], i[1]))+1
+                    if (i[0], i[1]) in list(self.goals.keys()):
+                        num = self.goals[(i[0], i[1])]
                         file.write(' #'+str(num))
                     file.write('\n')
-                print("TIME ->",self.measures.time)
-                
                 quit()
 
             if state == 'stop' and self.measures.start:
@@ -466,9 +478,9 @@ class MyRob(CRobLinkAngs):
             print("CAMINHO", self.path)
         
         print("not taken", self.dictionary_noTaken)
-        if self.measures.ground > 0: 
+        if self.measures.ground != -1 and (x,y)!=(0,0): 
             self.d[(x+28,14-y)] = 'O'
-            self.goals.append((x,y))
+            self.goals[(x,y)] = self.measures.ground
         else:
             self.add_dict((28+x,14-y), 'X')
 
