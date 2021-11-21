@@ -70,6 +70,8 @@ class MyRob(CRobLinkAngs):
                         num = self.goals.index((i[0], i[1]))+1
                         file.write(' #'+str(num))
                     file.write('\n')
+                print("TIME ->",self.measures.time)
+                
                 quit()
 
             if state == 'stop' and self.measures.start:
@@ -139,6 +141,26 @@ class MyRob(CRobLinkAngs):
                 else:
                     # print(self.measures.compass)
                     self.driveMotors(-0.07,0.07)                
+            if state == 'rotate mazespin':
+                # print("ESTOU A RODAR")
+                if self.nextorient == ():
+                    if self.correctCompass() == 90 or self.correctCompass() == -90: 
+                        self.nextorient = - self.correctCompass()
+                    # print("OBJETIVO", self.nextorient)
+                    elif self.correctCompass == -180:
+                        self.nextorient = 0
+                    elif self.correctCompass() == 0:
+                        self.nextorient = 180
+                    else: 
+                        self.nextorient=0
+                    
+                elif abs(self.measures.compass - self.nextorient) <= 5:
+                    self.myorient= self.nextorient
+                    self.nextorient = ()
+                    state = 'end'
+                else:
+                    # print(self.measures.compass)
+                    self.driveMotors(0.07,-0.07)
             if state == 'end':
                 self.driveMotors(0,0)
                 if self.calculate== True:
@@ -153,6 +175,9 @@ class MyRob(CRobLinkAngs):
 
                 state = self.next_move(self.prevTarget, self.target)
 
+
+
+            
                 
         
 
@@ -177,7 +202,7 @@ class MyRob(CRobLinkAngs):
                     return "rotate right"
                 else:
                     self.calculate = False
-                    return "rotate right"
+                    return "rotate mazespin"
 
             elif self.correctCompass() == 90:  # cima
                 if diff[0] == -2 and diff[1] == 0:
@@ -193,7 +218,7 @@ class MyRob(CRobLinkAngs):
                     return "rotate left"
                 else:
                     self.calculate = False
-                    return "rotate right"
+                    return "rotate mazespin"
 
             elif self.correctCompass() == -90:  # baixo
                 if diff[0] == 0 and diff[1] == 2:
@@ -209,7 +234,7 @@ class MyRob(CRobLinkAngs):
                     return "rotate left"
                 else: 
                     self.calculate = False
-                    return "rotate right"
+                    return "rotate mazespin"
 
             elif self.correctCompass() == 180 or self.correctCompass() == -180:  # esquerda
                 if diff[0] == 2 and diff[1] == 0:
@@ -226,9 +251,10 @@ class MyRob(CRobLinkAngs):
                     return "rotate right"
                 else:
                     self.calculate = False
-                    return "rotate right"
+                    return "rotate mazespin"
 
             return None
+            
             
 
     def calculateTarget(self):
