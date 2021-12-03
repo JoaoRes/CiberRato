@@ -81,7 +81,7 @@ class MyRob(CRobLinkAngs):
                             firstP = aux2.copy()
                             finPath = aux1.copy()
                 
-                file= open("path.out", 'w')
+                file= open(ficheiro, 'w')
                 file.write('0 0')
                 file.write('\n')
                 for i in reversed(finPath):

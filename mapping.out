@@ -1,27 +1,63 @@
-                                                       
-                                                       
-                                                       
-                                                       
-                                                       
-                                                       
-                                                       
-                                                       
-                                                       
-                                                       
-                         - - - - - - - - - - - - - -   
-                        |XXXXXXX|XXXXXXXXX|XXXXXXXXX|  
-                         - - X - X - - - X X - - - X   
-                        |XXIXXXXXX|XXXXX|X|XXXXXXXXX|  
-                         X - - - X X - - X - X - - X   
-                        |XXX|XXX|XXX|XXX|XXX|XXX|XXX|  
-                         - X X - X - X X - X - X - X   
-                          |X|XXXXX|XXX|X| |XXXXX|XXX|  
-                         - X - - - X - X - - X X - X   
-                        |XXX|XXXXXXX|X|X|XXXXX|XXXXX|  
-                         X - X - - - X X X - - X - X   
-                        |X| |X|XXXXXXX|XXX|XXXXXXXXX|  
-                         X - X X - - X - - X - - - X   
-                        |XXXXXXXXXXXXXXXXXXXXXXXXXXX|  
-                         - - - - - - - - - - - - - -   
-                                                       
-                                                       
+0 0
+-2 0
+-2 -2
+0 -2
+0 -4
+0 -6
+-2 -6
+-2 -8
+-2 -10
+0 -10
+0 -8 #4
+0 -10
+2 -10
+4 -10
+4 -8
+6 -8
+8 -8
+8 -6
+6 -6 #2
+8 -6
+8 -8
+10 -8
+10 -10
+12 -10
+14 -10
+16 -10
+16 -8
+18 -8
+20 -8
+20 -6
+22 -6
+24 -6
+24 -4
+24 -2
+22 -2 #3
+24 -2
+24 -4
+24 -6
+22 -6
+20 -6
+20 -4
+18 -4
+16 -4
+16 -2
+14 -2 #1
+16 -2
+16 -4
+14 -4
+14 -6
+14 -8
+12 -8
+12 -6
+12 -4
+12 -2
+12 0
+10 0
+8 0
+8 -2
+6 -2
+6 0
+4 0
+2 0
+0 0
