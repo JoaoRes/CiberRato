@@ -30,11 +30,11 @@ class MyRob(CRobLinkAngs):
     dictionary_noTaken= dict()
     havepath = False
     goals = {}
-    out = ()
-    out_1 = ()
-    gps = ()
-    prev_gps = ()
-
+    out = (0,0)
+    out_1 = (0,0)
+    gps = (0,0)
+    prev_gps = (0,0)
+    gps_robo = ()
     def __init__(self, rob_name, rob_id, angles, host):
         CRobLinkAngs.__init__(self, rob_name, rob_id, angles, host)
 
@@ -100,8 +100,8 @@ class MyRob(CRobLinkAngs):
                 self.mypos = (0,0)
                 self.target = (0,0)
                 self.prevTarget = (0,0)
-                self.out = (0,0)
-                self.prev_gps(0,0)
+                self.posinitial = (self.measures.x, self.measures.y)
+                self.gps_robo = (0,0)
                 state = stopped_state
 
             if state != 'stop' and self.measures.stop:
@@ -110,12 +110,13 @@ class MyRob(CRobLinkAngs):
 
             if state == 'go':
                 self.myorient = self.correctCompass()
+                self.gps_robo = (self.measures.x - self.posinitial[0], self.measures.y- self.posinitial[1])
                 # print('POSICAO INICIAL', self.posinitial)
                 # print('MINHA POSICAO', self.mypos)
                 # print('TARGET',self.target)
                 # print('\n')
 
-                print(self.target)
+                #print(self.target)
                 if self.measures.ground==0:
                     self.setVisitingLed(True)
 
@@ -130,11 +131,11 @@ class MyRob(CRobLinkAngs):
                     # print('CORRECAO DA BUSSOLA',self.correctCompass())
                     if self.correctCompass() == 180:
                         if self.measures.compass < 0:
-                            self.straight(0.15,self.measures.compass,0.05,self.correctCompass())
+                            self.straight(0.1,self.measures.compass,0.02,self.correctCompass())
                         else: 
-                            self.straight(0.15,self.measures.compass,0.05,self.correctCompass())
+                            self.straight(0.1,self.measures.compass,0.02,self.correctCompass())
                     else:
-                        self.straight(0.15,self.measures.compass,0.05,self.correctCompass())
+                        self.straight(0.1,self.measures.compass,0.02,self.correctCompass())
             if state== 'rotate right':
                 # print("ESTOU A RODAR")
                 if self.nextorient == ():
@@ -149,7 +150,7 @@ class MyRob(CRobLinkAngs):
                     state = 'end'
                 else:
                     # print(self.measures.compass)
-                    self.driveMotors(0.1,-0.1)
+                    self.straight(0,self.measures.compass,0.05,self.correctCompass())
                     
             if state == 'rotate left':
                 if self.nextorient == ():
@@ -164,7 +165,7 @@ class MyRob(CRobLinkAngs):
                     state = 'end'
                 else:
                     # print(self.measures.compass)
-                    self.driveMotors(-0.1,0.1)                
+                    self.straight(0,self.measures.compass,0.05,self.correctCompass())              
                     
             if state == 'rotate mazespin':
                 # print("ESTOU A RODAR")
@@ -185,14 +186,13 @@ class MyRob(CRobLinkAngs):
                     state = 'end'
                 else:
                     # print(self.measures.compass)
-                    self.driveMotors(0.1,-0.1)
+                    self.straight(0,self.measures.compass,0.05,self.correctCompass())
             if state == 'end':
-                self.driveMotors(0,0)
                 if self.calculate== True:
                     if self.havepath== True:
-                        print("DEBUG")
+                        #rint("DEBUG")
                         self.target= self.path.pop()
-                        print("TARGET", self.target)
+                        #print("TARGET", self.target)
                         if len(self.path)==0:
                             self.havepath= False
                     else:
@@ -201,6 +201,7 @@ class MyRob(CRobLinkAngs):
                 state = self.next_move(self.prevTarget, self.target)
 
             self.mypos = self.my_gps(self.prev_gps[0],self.prev_gps[1]) 
+            print("TEMPO ->", self.measures.time)
 
 
             
@@ -211,8 +212,8 @@ class MyRob(CRobLinkAngs):
     def next_move(self, position, target):
             # calcular next state com base no target
             diff = position[0] - target[0], position[1] - target[1]
-            print("DIFF -> ", diff)
-            print("ORIENTACAO -> ", self.correctCompass())
+            #print("DIFF -> ", diff)
+            #print("ORIENTACAO -> ", self.correctCompass())
 
             if self.correctCompass() == 0:  # direita
                 if diff[0] == -2 and diff[1] == 0:
@@ -284,14 +285,15 @@ class MyRob(CRobLinkAngs):
             
 
     def my_gps(self, prev_x, prev_y):
-        print("PREV X->" ,prev_x)
-        print("PREV Y->" ,prev_y)
 
+        print("GPS ROBO ->" , self.gps_robo)
+
+        if self.mypos == (0,0):
+            lin = (self.out[0]+self.out[1])/2 /2
+        else: 
+            lin = (self.out[0]+self.out[1])/2      
+        self.gps = ( prev_x + lin *cos(radians(self.correctCompass())) , prev_y + lin *sin(radians(self.correctCompass())) )
         
-        lin = (self.out[0]+self.out[1])/2
-        print("LIN ->", lin)        
-        self.gps[0] = prev_x + lin *cos(radians(self.correctCompass())) 
-        self.gps[1] = prev_y + lin *sin(radians(self.correctCompass()))
         
         self.prev_gps = self.gps
         print ("MY GPS->",self.gps)
@@ -302,13 +304,15 @@ class MyRob(CRobLinkAngs):
         rot = k * (m-ref)
         self.out_1 = self.out
 
+        print("ROT ->", rot)
         right_wheel = linear - (rot/2)
         left_wheel = linear + (rot/2)
 
+
         self.driveMotors(left_wheel,right_wheel)
 
-        self.out[0]= (left_wheel + self.out_1[0]) / 2
-        self.out[1]= (right_wheel + self.out_1[1]) / 2
+        self.out = ( (left_wheel + self.out_1[0]) / 2 , (right_wheel + self.out_1[1]) / 2 )
+         
 
     def reached(self, mypos, target):
         array= []
@@ -481,22 +485,22 @@ class MyRob(CRobLinkAngs):
                 self.finish()
                 return
 
-            print("LENGTH DICIONARIO -> " , len(self.dictionary_noTaken)   )
+            #print("LENGTH DICIONARIO -> " , len(self.dictionary_noTaken)   )
 
             neigh = min(self.dictionary_noTaken,key=lambda point : hypot(self.prevTarget[1]-point[1], self.prevTarget[0]-point[0]))
             
-            print("SOU O NEIGHBOR", neigh)
-            print("sou o target anterior", self.prevTarget)
-            print("VIsited -> "+str(self.visited))
+            #print("SOU O NEIGHBOR", neigh)
+            #print("sou o target anterior", self.prevTarget)
+            #print("VIsited -> "+str(self.visited))
             #print("Walls -> "+str(self.walls))
             self.path= astar(self.prevTarget,neigh,self.visited,self.walls)
             self.target= self.path.pop()
             self.calculate== False
             if len(self.path)!=0:
                 self.havepath=True
-            print("CAMINHO", self.path)
+            #print("CAMINHO", self.path)
         
-        print("not taken", self.dictionary_noTaken)
+        #print("not taken", self.dictionary_noTaken)
         if self.measures.ground != -1 and (x,y)!=(0,0): 
             self.d[(x+28,14-y)] = 'O'
             self.goals[(x,y)] = self.measures.ground
