@@ -24,18 +24,16 @@ class MyRob(CRobLinkAngs):
     mypos= ()
     myorient = ()
     nextorient = ()
-    d = {(28,14): '0'}
+    d = {(28,14): 'I'}
     neighbors = [(0,2),(0,-2),(2,0),(-2,0)]
     path = list()
     dictionary_noTaken= dict()
     havepath = False
     goals = {}
-    gps = (0,0)
-    prev_gps = (0,0)
-    right_wheel = 0
-    left_wheel = 0
-    out =(0,0)
-    out_1 = (0,0)
+    out = ()
+    out_1 = ()
+    gps = ()
+    prev_gps = ()
 
     def __init__(self, rob_name, rob_id, angles, host):
         CRobLinkAngs.__init__(self, rob_name, rob_id, angles, host)
@@ -62,7 +60,7 @@ class MyRob(CRobLinkAngs):
             self.readSensors()
             if self.measures.endLed:
                 print(self.robName + " exiting")
-                (x, y) = self.my_gps(self.prev_gps[0],self.prev_gps[1])
+                (x, y) = (self.mypos)
                 if self.measures.ground != -1 and (x,y)!=(0,0): 
                     self.goals[(x,y)] = self.measures.ground
                 g = list(self.goals.keys())
@@ -87,7 +85,7 @@ class MyRob(CRobLinkAngs):
                             firstP = aux2.copy()
                             finPath = aux1.copy()
                 
-                file= open("pathC4.out", 'w')
+                file= open(ficheiro, 'w')
                 file.write('0 0')
                 file.write('\n')
                 for i in reversed(finPath):
@@ -99,11 +97,11 @@ class MyRob(CRobLinkAngs):
                 quit()
 
             if state == 'stop' and self.measures.start:
+                self.mypos = (0,0)
                 self.target = (0,0)
                 self.prevTarget = (0,0)
-                self.mypos = (0,0)
-                self.myorient= self.correctCompass()
-                self.prev_gps= (0,0)
+                self.out = (0,0)
+                self.prev_gps(0,0)
                 state = stopped_state
 
             if state != 'stop' and self.measures.stop:
@@ -111,7 +109,6 @@ class MyRob(CRobLinkAngs):
                 state = 'stop'
 
             if state == 'go':
-                self.prev_gps = self.mypos
                 self.myorient = self.correctCompass()
                 # print('POSICAO INICIAL', self.posinitial)
                 # print('MINHA POSICAO', self.mypos)
@@ -134,13 +131,10 @@ class MyRob(CRobLinkAngs):
                     if self.correctCompass() == 180:
                         if self.measures.compass < 0:
                             self.straight(0.15,self.measures.compass,0.05,self.correctCompass())
-                            
                         else: 
                             self.straight(0.15,self.measures.compass,0.05,self.correctCompass())
-                          
                     else:
                         self.straight(0.15,self.measures.compass,0.05,self.correctCompass())
-                       
             if state== 'rotate right':
                 # print("ESTOU A RODAR")
                 if self.nextorient == ():
@@ -149,13 +143,14 @@ class MyRob(CRobLinkAngs):
                     else:
                         self.nextorient = self.myorient-90
                     # print("OBJETIVO", self.nextorient)
-                elif abs(self.measures.compass - self.nextorient) <= 5:
+                elif abs(self.measures.compass - self.nextorient) <=10:
                     self.myorient= self.nextorient
                     self.nextorient = ()
                     state = 'end'
                 else:
                     # print(self.measures.compass)
-                    self.driveMotors(0.07,-0.07)
+                    self.driveMotors(0.1,-0.1)
+                    
             if state == 'rotate left':
                 if self.nextorient == ():
                     if self.correctCompass() == 180 or self.correctCompass() == -180: 
@@ -163,15 +158,14 @@ class MyRob(CRobLinkAngs):
                     else:
                         self.nextorient = self.myorient+90
                     # print("OBJETIVO", self.nextorient)
-                elif abs(self.measures.compass - self.nextorient) <=5:
+                elif abs(self.measures.compass - self.nextorient) <=10 :
                     self.myorient= self.nextorient
                     self.nextorient = ()
                     state = 'end'
                 else:
                     # print(self.measures.compass)
-                    self.driveMotors(-0.07,0.07) 
-        
-
+                    self.driveMotors(-0.1,0.1)                
+                    
             if state == 'rotate mazespin':
                 # print("ESTOU A RODAR")
                 if self.nextorient == ():
@@ -191,10 +185,9 @@ class MyRob(CRobLinkAngs):
                     state = 'end'
                 else:
                     # print(self.measures.compass)
-                    self.driveMotors(0.1,-0.1)   
+                    self.driveMotors(0.1,-0.1)
             if state == 'end':
                 self.driveMotors(0,0)
-                print("POSIÇÃO NO END ->", self.mypos)
                 if self.calculate== True:
                     if self.havepath== True:
                         print("DEBUG")
@@ -206,23 +199,12 @@ class MyRob(CRobLinkAngs):
                         self.compass_orientation(self.checkwalls())
 
                 state = self.next_move(self.prevTarget, self.target)
+
+            self.mypos = self.my_gps(self.prev_gps[0],self.prev_gps[1]) 
+
+
             
-            print("MY PREV GPS ->", self.prev_gps)
-            self.mypos=self.my_gps(self.prev_gps[0], self.prev_gps[1])
-
-    
-    def my_gps(self, prev_x, prev_y):
-        print("PREV X->" ,prev_x)
-        print("PREV Y->" ,prev_y)
-
-
-        lin = (self.out[0]+self.out[1])/2
-        print("LIN ->", lin)        
-        self.gps = (prev_x + lin *cos(radians(self.correctCompass())) , prev_y + lin *sin(radians(self.correctCompass())))
-        
-        print ("MY GPS->",self.gps)
-
-        return(self.gps)
+                
         
 
 
@@ -231,11 +213,9 @@ class MyRob(CRobLinkAngs):
             diff = position[0] - target[0], position[1] - target[1]
             print("DIFF -> ", diff)
             print("ORIENTACAO -> ", self.correctCompass())
-            print("TARGET ->", target) 
-            print("GPS ->", self.mypos)
 
             if self.correctCompass() == 0:  # direita
-                if diff[0]== -2 and diff[1] ==0:
+                if diff[0] == -2 and diff[1] == 0:
                     self.calculate = False
                     return "go"
 
@@ -248,7 +228,7 @@ class MyRob(CRobLinkAngs):
                     return "rotate right"
                 else:
                     self.calculate = False
-                    return "rotate right"
+                    return "rotate mazespin"
 
             elif self.correctCompass() == 90:  # cima
                 if diff[0] == -2 and diff[1] == 0:
@@ -264,7 +244,7 @@ class MyRob(CRobLinkAngs):
                     return "rotate left"
                 else:
                     self.calculate = False
-                    return "rotate right"
+                    return "rotate mazespin"
 
             elif self.correctCompass() == -90:  # baixo
                 if diff[0] == 0 and diff[1] == 2:
@@ -280,7 +260,7 @@ class MyRob(CRobLinkAngs):
                     return "rotate left"
                 else: 
                     self.calculate = False
-                    return "rotate right"
+                    return "rotate mazespin"
 
             elif self.correctCompass() == 180 or self.correctCompass() == -180:  # esquerda
                 if diff[0] == 2 and diff[1] == 0:
@@ -297,19 +277,38 @@ class MyRob(CRobLinkAngs):
                     return "rotate right"
                 else:
                     self.calculate = False
-                    return "rotate right"
+                    return "rotate mazespin"
 
             return None
+        
+            
+
+    def my_gps(self, prev_x, prev_y):
+        print("PREV X->" ,prev_x)
+        print("PREV Y->" ,prev_y)
+
+        
+        lin = (self.out[0]+self.out[1])/2
+        print("LIN ->", lin)        
+        self.gps[0] = prev_x + lin *cos(radians(self.correctCompass())) 
+        self.gps[1] = prev_y + lin *sin(radians(self.correctCompass()))
+        
+        self.prev_gps = self.gps
+        print ("MY GPS->",self.gps)
+
+        return(self.gps)
 
     def straight(self, linear, m, k, ref):
         rot = k * (m-ref)
         self.out_1 = self.out
 
-        self.right_wheel = linear - (rot/2)
-        self.left_wheel = linear + (rot/2)
+        right_wheel = linear - (rot/2)
+        left_wheel = linear + (rot/2)
 
-        self.driveMotors(self.left_wheel,self.right_wheel)
-        self.out = ((self.left_wheel-self.out_1[0]/2),(self.right_wheel-self.out_1[1])/2)
+        self.driveMotors(left_wheel,right_wheel)
+
+        self.out[0]= (left_wheel + self.out_1[0]) / 2
+        self.out[1]= (right_wheel + self.out_1[1]) / 2
 
     def reached(self, mypos, target):
         array= []
@@ -332,11 +331,11 @@ class MyRob(CRobLinkAngs):
 
     
     def correctCompass(self):
-        if -10 < self.measures.compass < 10:
+        if -15 < self.measures.compass < 15:
             return 0
-        elif 80 < self.measures.compass< 100:
+        elif 75 < self.measures.compass< 105:
             return 90
-        elif -100 < self.measures.compass <-80:
+        elif -105 < self.measures.compass <-75:
             return -90
         elif self.measures.compass <= -170 or self.measures.compass >= 170:  
             return 180 * self.measures.compass / abs(self.measures.compass)
@@ -353,9 +352,7 @@ class MyRob(CRobLinkAngs):
     #checks compass orientation 
     def compass_orientation(self,walls):
         compass = self.correctCompass()
-        print("PREV TARGET -> ", self.prevTarget)
-        print("MINHA ORIENT->" , self.myorient)
-        (x, y) =  (0,0)
+        (x, y) = (round(self.mypos[0]),round(self.mypos[1]))
         tmp= [0,0,0] #[front, right, left]
 
         if compass==0:
@@ -469,17 +466,18 @@ class MyRob(CRobLinkAngs):
             self.target = tmp[2]
             self.visited.add(tmp[2])
         else:
+            array= []
             for i in self.dictionary_noTaken.keys():
                 if len(self.dictionary_noTaken[i]) == 0:
                     array.append(i)
+                if self.prevTarget in self.dictionary_noTaken[i]:
+                    self.dictionary_noTaken[i].discard(self.prevTarget)
             for i in array:
                 self.dictionary_noTaken.pop(i)
+
             
             if len(self.dictionary_noTaken.keys()) == 0:
-                if self.measures.ground != -1: 
-                    self.d[(x+28,14-y)] = str(self.measures.ground)
-                    self.goals[(x,y)] = self.measures.ground
-
+                print("MESTRE DA CULINARIA")
                 self.finish()
                 return
 
@@ -499,8 +497,8 @@ class MyRob(CRobLinkAngs):
             print("CAMINHO", self.path)
         
         print("not taken", self.dictionary_noTaken)
-        if self.measures.ground != -1: 
-            self.d[(x+28,14-y)] = str(self.measures.ground)
+        if self.measures.ground != -1 and (x,y)!=(0,0): 
+            self.d[(x+28,14-y)] = 'O'
             self.goals[(x,y)] = self.measures.ground
         else:
             self.add_dict((28+x,14-y), 'X')
@@ -535,7 +533,7 @@ class MyRob(CRobLinkAngs):
         return walls
 
     def mapWriting(self):
-        file= open("mappingC4.out", 'w')    
+        file= open("mappingC3.txt", 'w')    
         for i in range(1,28):
             for j in range(1,56):
                 if (j,i) in self.d:
@@ -580,16 +578,19 @@ rob_name = "pClient1"
 host = "localhost"
 pos = 1
 mapc = None
+ficheiro = ""
 
 for i in range(1, len(sys.argv),2):
     if (sys.argv[i] == "--host" or sys.argv[i] == "-h") and i != len(sys.argv) - 1:
         host = sys.argv[i + 1]
     elif (sys.argv[i] == "--pos" or sys.argv[i] == "-p") and i != len(sys.argv) - 1:
         pos = int(sys.argv[i + 1])
-    elif (sys.argv[i] == "--robname" or sys.argv[i] == "-p") and i != len(sys.argv) - 1:
+    elif (sys.argv[i] == "--robname" or sys.argv[i] == "-r") and i != len(sys.argv) - 1:
         rob_name = sys.argv[i + 1]
     elif (sys.argv[i] == "--map" or sys.argv[i] == "-m") and i != len(sys.argv) - 1:
         mapc = Map(sys.argv[i + 1])
+    elif (sys.argv[i] == "--file" or sys.argv[i] == "-f") and i != len(sys.argv) - 1:
+        ficheiro = (sys.argv[i + 1])
     else:
         print("Unkown argument", sys.argv[i])
         quit()
