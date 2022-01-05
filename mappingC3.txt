@@ -6,17 +6,17 @@
                                                        
                                                        
                                                        
-                                                       
-                                                       
-                                                       
-                             X   X                     
-                           - X - X                     
-                           IXXXXXX|                    
-                           - - - X                     
-                                 X                     
-                                                       
-                                                       
-                                                       
+                                 - -                   
+                             X  |XXX|                  
+                             X   X -                   
+                             XXX|XXX                   
+                           - - - X X - -               
+                           IXX XXX|XXXXX|              
+                           - - - X X|- -               
+                            |XXX|XXX                   
+                             X -                       
+                            |XXXXX|                    
+                             - - -                     
                                                        
                                                        
                                                        
