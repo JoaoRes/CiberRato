@@ -178,36 +178,36 @@ class MyRob(CRobLinkAngs):
                     self.in_left=0
                     #self.out = ( (0 + self.out_1[0]) / 2 , (0 + self.out_1[1]) / 2 )        
                     
-            #if state == 'rotate mazespin':
-                # print("ESTOU A RODAR")
-             #   if self.nextorient == ():
-             #       if self.correctCompass() == 90 or self.correctCompass() == -90: 
-             #           self.nextorient = - self.correctCompass()
-             #       # print("OBJETIVO", self.nextorient)
-             #       elif self.correctCompass == -180:
-             #           self.nextorient = 0
-             #       elif self.correctCompass() == 0:
-             #           self.nextorient = 180
-             #       else: 
-             #           self.nextorient=0
-             #       
-             #   elif abs(self.measures.compass - self.nextorient) <= 10:
-             #       self.myorient= self.nextorient
-             #       self.nextorient = ()
-             #       state = 'end'
-             #   else:
-                    # print(self.measures.compass)
-               #     self.driveMotors(-0.05,0.05)
-              #      in_right=0
-             #       in_left=0
-            #        #self.out = ( (0 + self.out_1[0]) / 2 , (0 + self.out_1[1]) / 2 )
+            if state == 'rotate mazespin':
+                print("ESTOU A RODAR")
+                if self.nextorient == ():
+                    if self.correctCompass() == 90 or self.correctCompass() == -90: 
+                        self.nextorient = - self.correctCompass()
+                        print("OBJETIVO", self.nextorient)
+                    elif self.correctCompass == -180:
+                        self.nextorient = 0
+                    elif self.correctCompass() == 0:
+                        self.nextorient = 180
+                    else: 
+                        self.nextorient=0
+                    
+                elif abs(self.measures.compass - self.nextorient) <= 10:
+                    self.myorient= self.nextorient
+                    self.nextorient = ()
+                    state = 'end'
+                else:
+                    print(self.measures.compass)
+                    self.driveMotors(-0.05,0.05)
+                    self.in_right=0
+                    self.in_left=0
+                    #self.out = ( (0 + self.out_1[0]) / 2 , (0 + self.out_1[1]) / 2 )
             if state == 'end':
                 print("ANTES DA CORREÇÃO ->" , self.mypos)
                 self.gps_Correction(self.checkwalls())
                 print("DEPOIS DA CORREÇÃO -> ", self.mypos)
                 if self.calculate== True:
                     if self.havepath== True:
-                        #rint("DEBUG")
+                        print("PATH -> " ,self.path)
                         self.target= self.path.pop()
                         #print("TARGET", self.target)
                         if len(self.path)==0:
@@ -219,7 +219,7 @@ class MyRob(CRobLinkAngs):
 
             self.mypos = self.my_gps(self.prev_gps[0],self.prev_gps[1]) 
             print("TEMPO ->", self.measures.time)
-            print("TARGET -> ", self.target)
+            #print("TARGET -> ", self.target)
             print("ORIENTACAO -> ", self.correctCompass())
 
             
@@ -247,7 +247,7 @@ class MyRob(CRobLinkAngs):
                     return "rotate right"
                 else:
                     self.calculate = False
-                    return "rotate right"
+                    return "rotate mazespin"
 
             elif self.correctCompass() == 90:  # cima
                 if diff[0] == -2 and diff[1] == 0:
@@ -263,7 +263,7 @@ class MyRob(CRobLinkAngs):
                     return "rotate left"
                 else:
                     self.calculate = False
-                    return "rotate right"
+                    return "rotate mazespin"
 
             elif self.correctCompass() == -90:  # baixo
                 if diff[0] == 0 and diff[1] == 2:
@@ -279,7 +279,7 @@ class MyRob(CRobLinkAngs):
                     return "rotate left"
                 else: 
                     self.calculate = False
-                    return "rotate right"
+                    return "rotate mazespin"
 
             elif self.correctCompass() == 180 or self.correctCompass() == -180:  # esquerda
                 if diff[0] == 2 and diff[1] == 0:
@@ -296,7 +296,7 @@ class MyRob(CRobLinkAngs):
                     return "rotate right"
                 else:
                     self.calculate = False
-                    return "rotate right"
+                    return "rotate mazespin"
 
             return None
     
@@ -397,19 +397,19 @@ class MyRob(CRobLinkAngs):
     def reached(self, mypos, target):
         array= []
         if self.myorient== 0 :
-            if abs(mypos[0] -target[0]) <= 0.38:
+            if abs(mypos[0] -target[0]) <= 0.35:
                 self.calculate = True
                 return 1
         elif self.myorient== 90 :
-            if abs(mypos[1] - target[1]) <= 0.38:
+            if abs(mypos[1] - target[1]) <= 0.35:
                 self.calculate = True
                 return 1
         elif self.myorient== -90 :
-            if abs(mypos[1] -target[1]) <= 0.38:
+            if abs(mypos[1] -target[1]) <= 0.35:
                 self.calculate = True
                 return 1
         elif self.myorient== 180  or self.myorient==-180:
-            if abs(mypos[0] -target[0]) <= 0.38:
+            if abs(mypos[0] -target[0]) <= 0.35:
                 self.calculate = True
                 return 1        
 
@@ -614,15 +614,15 @@ class MyRob(CRobLinkAngs):
         
         walls = [0,0,0,0]       # walls =[front, right, left, back]
 
-        if self.measures.irSensor[center_id] >= 1.2: 
+        if self.measures.irSensor[center_id] >= 0.8: 
             walls[0] = 1
-        if self.measures.irSensor[right_id] >= 1.2: 
+        if self.measures.irSensor[right_id] >= 1.3: 
             #print("wall right")
             walls[1] = 1
-        if self.measures.irSensor[left_id] >= 1.2: 
+        if self.measures.irSensor[left_id] >= 1.3: 
             #print("wall left")
             walls[2]=1
-        if self.measures.irSensor[back_id] >= 1.2: 
+        if self.measures.irSensor[back_id] >= 1.3: 
             #print("wall back")
             walls[3]=1
         
