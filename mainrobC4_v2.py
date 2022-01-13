@@ -179,11 +179,11 @@ class MyRob(CRobLinkAngs):
                     #self.out = ( (0 + self.out_1[0]) / 2 , (0 + self.out_1[1]) / 2 )        
                     
             if state == 'rotate mazespin':
-                print("ESTOU A RODAR")
+                # print("ESTOU A RODAR")
                 if self.nextorient == ():
                     if self.correctCompass() == 90 or self.correctCompass() == -90: 
                         self.nextorient = - self.correctCompass()
-                        print("OBJETIVO", self.nextorient)
+                        # print("OBJETIVO", self.nextorient)
                     elif self.correctCompass == -180:
                         self.nextorient = 0
                     elif self.correctCompass() == 0:
@@ -196,7 +196,7 @@ class MyRob(CRobLinkAngs):
                     self.nextorient = ()
                     state = 'end'
                 else:
-                    print(self.measures.compass)
+                    # print(self.measures.compass)
                     self.driveMotors(-0.05,0.05)
                     self.in_right=0
                     self.in_left=0
@@ -207,10 +207,11 @@ class MyRob(CRobLinkAngs):
                 #print("DEPOIS DA CORREÇÃO -> ", self.mypos)
                 if self.calculate== True:
                     print("Print Walls", self.checkwalls())
+                    
                     if self.havepath == True:
-                        print("PATH -> " ,self.path)
+                        # print("PATH -> " ,self.path)
                         self.target = self.path.pop()
-                        print("TARGET LA DE CIMA-> ",self.target)
+                        # print("TARGET LA DE CIMA-> ",self.target)
                         #print("TARGET", self.target)
                         if len(self.path)== 0:
                             self.havepath= False
@@ -220,10 +221,10 @@ class MyRob(CRobLinkAngs):
                 state = self.next_move(self.prevTarget, self.target)
 
             self.mypos = self.my_gps(self.prev_gps[0],self.prev_gps[1]) 
-            print("PATH-> ", self.path)
-            print("MY POS-> ", round(self.mypos[0]) ,round(self.mypos[1]))
+            # print("PATH-> ", self.path)
+            # print("MY POS-> ", round(self.mypos[0]) ,round(self.mypos[1]))
             #print("TEMPO ->", self.measures.time)
-            print("TARGET -> ", self.target)
+            # print("TARGET -> ", self.target)
             #print("ORIENTACAO -> ", self.correctCompass())
 
             
@@ -317,7 +318,7 @@ class MyRob(CRobLinkAngs):
             if walls[0]==1:
                 wall_position = (self.prevTarget[0]+1, self.prevTarget[1])
                 self.mypos = (wall_position[0]-self.distSensor(center_id)-0.5, self.prevTarget[1])
-            
+
             if walls[1]==1:
                 wall_position = (self.prevTarget[0], self.prevTarget[1]+1)
                 self.mypos = (self.prevTarget[0], wall_position[1] - self.distSensor(left_id)-0.5)
@@ -401,19 +402,19 @@ class MyRob(CRobLinkAngs):
     def reached(self, mypos, target):
         array= []
         if self.myorient== 0 :
-            if abs(mypos[0] -target[0]) <= 0.4:
+            if abs(mypos[0] -target[0]) <= 0.4 and round(mypos[0])%2==0 and round(mypos[1])%2==0:
                 self.calculate = True
                 return 1
         elif self.myorient== 90 :
-            if abs(mypos[1] - target[1]) <= 0.4:
+            if abs(mypos[1] - target[1]) <= 0.4 and round(mypos[1])%2==0 and round(mypos[0])%2==0:
                 self.calculate = True
                 return 1
         elif self.myorient== -90 :
-            if abs(mypos[1] -target[1]) <= 0.4:
+            if abs(mypos[1] -target[1]) <= 0.4 and round(mypos[1])%2==0 and round(mypos[0])%2==0:
                 self.calculate = True
                 return 1
         elif self.myorient== 180  or self.myorient==-180:
-            if abs(mypos[0] -target[0]) <= 0.4:
+            if abs(mypos[0] -target[0]) <= 0.4 and round(mypos[0])%2==0 and round(mypos[1])%2==0:
                 self.calculate = True
                 return 1        
 
@@ -441,30 +442,38 @@ class MyRob(CRobLinkAngs):
     #checks compass orientation 
     def compass_orientation(self,walls):
         compass = self.correctCompass()
-        (x, y) = (round(self.mypos[0]),round(self.mypos[1]))
+        (x, y) = (self.prevTarget)
         tmp= [0,0,0] #[front, right, left]
+        print("MYPOS-> ", (round(self.mypos[0]),round(self.mypos[1])))
+        print("Target -> ", self.target)
 
         if compass==0:
             if walls[0] == 1 :
+                print('| :', (x+1,y))
                 self.add_dict((28+x+1,14-y), '|')
             else: 
                 self.add_dict((28+x+1,14-y), 'X')
+                print('X :', (x+1,y))
                 tmp[0] = (self.prevTarget[0]+2,self.prevTarget[1])
                 #tmp[0]=(x+2,y)
                 if (x+2,y) not in self.visited:
                     self.add_dict((28+x+2,14-y), 'X')
             if walls[1] == 1 :
                 self.add_dict((28+x,14-y+1), '-')
+                print('- :', (x,y+1))
             else: 
                 self.add_dict((28+x,14-y+1), 'X')
+                print('X :', (x,y+1))
                 tmp[1] = (self.prevTarget[0],self.prevTarget[1]-2)
                 #tmp[1]=(x,y-2)
                 if (x,y-2) not in self.visited:
                     self.add_dict((28+x,14-y+2), 'X')
             if walls[2] == 1 :
                 self.add_dict((28+x,14-y-1), '-')
+                print('- :', (x,y-1))
             else: 
                 self.add_dict((28+x,14-y-1), 'X')
+                print('X :', (x,y-1))
                 tmp[2] = (self.prevTarget[0],self.prevTarget[1]+2)
                 #tmp[2]=(x,y+2)
                 if (x,y+2) not in self.visited:
@@ -473,24 +482,30 @@ class MyRob(CRobLinkAngs):
         elif compass==90:
             if walls[0] == 1 :
                 self.add_dict((28+x,14-y-1), '-')
+                print('- :', (x,y-1))
             else: 
                 self.add_dict((28+x,14-y-1), 'X')
+                print('X :', (x,y-1))
                 tmp[0] = (self.prevTarget[0],self.prevTarget[1]+2)
                 #tmp[0]=(x,y+2)
                 if (x,y+2) not in self.visited:
                     self.add_dict((28+x,14-y+2), 'X')
             if walls[1] == 1 :
                 self.add_dict((28+x+1,14-y), '|')
+                print('| :', (x+1,y))
             else: 
                 self.add_dict((28+x+1,14-y), 'X')
+                print('X :', (x+1,y))
                 tmp[1] = (self.prevTarget[0]+2,self.prevTarget[1])
                 #tmp[1]=(x+2,y)
                 if (x+2,y) not in self.visited:
                     self.add_dict((28+x+2,14-y), 'X')
             if walls[2] == 1 :
                 self.add_dict((28+x-1,14-y), '|')
+                print('| :', (x-1,y))
             else: 
                 self.add_dict((28+x-1,14-y), 'X')
+                print('X :', (x-1,y))
                 tmp[2] = (self.prevTarget[0]-2,self.prevTarget[1])
                 #tmp[2]=(x-2,y)
                 if (x-2,y) not in self.visited:
@@ -499,24 +514,30 @@ class MyRob(CRobLinkAngs):
         elif compass==180 or compass == -180:
             if walls[0] == 1 :
                 self.add_dict((28+x-1,14-y), '|')
+                print('| :', (x-1,y))
             else: 
                 self.add_dict((28+x-1,14-y), 'X')
+                print('X :', (x-1,y))
                 tmp[0] = (self.prevTarget[0]-2,self.prevTarget[1])
                 #tmp[0] = (x-2,y)
                 if (x+2,y) not in self.visited:
                     self.add_dict((28+x-2,14-y), 'X')
             if walls[1] == 1 :
                 self.add_dict((28+x,14-y-1), '-')
+                print('- :', (x,y-1))
             else: 
                 self.add_dict((28+x,14-y-1), 'X')
+                print('X :', (x,y-1))
                 tmp[1] = (self.prevTarget[0],self.prevTarget[1]+2)
                 #tmp[1]= (x,y+2)
                 if (x,y+2) not in self.visited:
                     self.add_dict((28+x,14-y-2), 'X')
             if walls[2] == 1 :
                 self.add_dict((28+x,14-y+1), '-')
+                print('- :', (x,y+1))
             else: 
                 self.add_dict((28+x,14-y+1), 'X')
+                print('X :', (x,y+1))
                 tmp[2] = (self.prevTarget[0],self.prevTarget[1]-2)
                 #tmp[2]= (x,y-2)
                 if (x,y-2) not in self.visited:
@@ -525,24 +546,30 @@ class MyRob(CRobLinkAngs):
         elif compass==-90:
             if walls[0] == 1 :
                 self.add_dict((28+x,14-y+1), '-')
+                print('- :', (x,y+1))
             else: 
                 self.add_dict((28+x,14-y+1), 'X')
+                print('X :', (x,y+1))
                 tmp[0] = (self.prevTarget[0],self.prevTarget[1]-2)
                 #tmp[0]=(x,y-2)
                 if (x,y-2) not in self.visited:
                     self.add_dict((28+x,14-y-2), 'X')
             if walls[1] == 1 :
                 self.add_dict((28+x-1,14-y), '|')
+                print('| :', (x-1,y))
             else: 
                 self.add_dict((28+x-1,14-y), 'X')
+                print('X :', (x-1,y))
                 tmp[1] = (self.prevTarget[0]-2,self.prevTarget[1])
                 #tmp[1]=(x-2,y)
                 if (x-2,y) not in self.visited:
                     self.add_dict((28+x-2,14-y), 'X')
             if walls[2] == 1 :
                 self.add_dict((28+x+1,14-y), '|')
+                print('| :', (x+1,y))
             else: 
                 self.add_dict((28+x+1,14-y), 'X')
+                print('X :', (x+1,y))
                 tmp[2] = (self.prevTarget[0]+2,self.prevTarget[1])
                 #tmp[2]=(x+2,y)
                 if (x+2,y) not in self.visited:
@@ -590,6 +617,7 @@ class MyRob(CRobLinkAngs):
             #print("sou o target anterior", self.prevTarget)
             #print("VIsited -> "+str(self.visited))
             #print("Walls -> "+str(self.walls))
+            print("NEIGH -> ", neigh)
             self.path= astar(self.prevTarget,neigh,self.visited,self.walls)
             self.target = self.path.pop()
             self.calculate== False
@@ -621,13 +649,13 @@ class MyRob(CRobLinkAngs):
 
         if self.measures.irSensor[center_id] >= 1: 
             walls[0] = 1
-        if self.measures.irSensor[right_id] >= 1.2: 
+        if self.measures.irSensor[right_id] >= 1.4: 
             #print("wall right")
             walls[1] = 1
-        if self.measures.irSensor[left_id] >= 1.2: 
+        if self.measures.irSensor[left_id] >= 1.4: 
             #print("wall left")
             walls[2]=1
-        if self.measures.irSensor[back_id] >= 1.2: 
+        if self.measures.irSensor[back_id] >= 1.4: 
             #print("wall back")
             walls[3]=1
         
