@@ -22,6 +22,6 @@
                         |X|O|X|XXXXXXX|XXX|XXXXXXXXX|  
                          X X X X - - X - - X - - - X   
                         |XXXXXXXXXXX|XXXXXXXXXXXXXXX|  
-                         - - - - -   - - - - - - - -   
+                         - - - - - - - - - - - - - -   
                                                        
                                                        
