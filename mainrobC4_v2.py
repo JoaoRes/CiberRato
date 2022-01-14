@@ -137,11 +137,11 @@ class MyRob(CRobLinkAngs):
                     # print('CORRECAO DA BUSSOLA',self.correctCompass())
                     if self.correctCompass() == 180:
                         if self.measures.compass < 0:
-                            self.straight(0.12,self.measures.compass,0.01,self.correctCompass())
+                            self.straight(0.10,self.measures.compass,0.01,self.correctCompass())
                         else: 
-                            self.straight(0.12,self.measures.compass,0.01,self.correctCompass())
+                            self.straight(0.10,self.measures.compass,0.01,self.correctCompass())
                     else:
-                        self.straight(0.12,self.measures.compass,0.01,self.correctCompass())
+                        self.straight(0.10,self.measures.compass,0.01,self.correctCompass())
             if state== 'rotate right':
                 # print("ESTOU A RODAR")
                 if self.nextorient == ():
@@ -223,10 +223,10 @@ class MyRob(CRobLinkAngs):
 
             self.mypos = self.my_gps(self.prev_gps[0],self.prev_gps[1]) 
             # print("PATH-> ", self.path)
-            # print("MY POS-> ", round(self.mypos[0]) ,round(self.mypos[1]))
+            print("MY POS-> ", round(self.mypos[0]) ,round(self.mypos[1]))
             #print("TEMPO ->", self.measures.time)
             # print("TARGET -> ", self.target)
-            #print("ORIENTACAO -> ", self.correctCompass())
+            print("ORIENTACAO -> ", self.correctCompass())
 
             
                 
@@ -403,19 +403,19 @@ class MyRob(CRobLinkAngs):
     def reached(self, mypos, target):
         array= []
         if self.myorient== 0 :
-            if abs(mypos[0] -target[0]) <= 0.35 and round(mypos[0])%2==0 and round(mypos[1])%2==0:
+            if abs(mypos[0] -target[0]) <= 0.28 and round(mypos[0])%2==0 and round(mypos[1])%2==0:
                 self.calculate = True
                 return 1
         elif self.myorient== 90 :
-            if abs(mypos[1] - target[1]) <= 0.35 and round(mypos[1])%2==0 and round(mypos[0])%2==0:
+            if abs(mypos[1] - target[1]) <= 0.28 and round(mypos[1])%2==0 and round(mypos[0])%2==0:
                 self.calculate = True
                 return 1
         elif self.myorient== -90 :
-            if abs(mypos[1] -target[1]) <= 0.35 and round(mypos[1])%2==0 and round(mypos[0])%2==0:
+            if abs(mypos[1] -target[1]) <= 0.28 and round(mypos[1])%2==0 and round(mypos[0])%2==0:
                 self.calculate = True
                 return 1
         elif self.myorient== 180  or self.myorient==-180:
-            if abs(mypos[0] -target[0]) <= 0.35 and round(mypos[0])%2==0 and round(mypos[1])%2==0:
+            if abs(mypos[0] -target[0]) <= 0.28 and round(mypos[0])%2==0 and round(mypos[1])%2==0:
                 self.calculate = True
                 return 1        
 
@@ -650,13 +650,13 @@ class MyRob(CRobLinkAngs):
 
         if self.measures.irSensor[center_id] >= 1: 
             walls[0] = 1
-        if self.measures.irSensor[right_id] >= 1.52: 
+        if self.measures.irSensor[right_id] >= 1.2: 
             #print("wall right")
             walls[1] = 1
-        if self.measures.irSensor[left_id] >= 1.52: 
+        if self.measures.irSensor[left_id] >= 1.2: 
             #print("wall left")
             walls[2]=1
-        if self.measures.irSensor[back_id] >= 1.52: 
+        if self.measures.irSensor[back_id] >= 1.2: 
             #print("wall back")
             walls[3]=1
         
