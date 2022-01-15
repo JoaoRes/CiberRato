@@ -648,7 +648,7 @@ class MyRob(CRobLinkAngs):
         
         walls = [0,0,0,0]       # walls =[front, right, left, back]
 
-        if self.measures.irSensor[center_id] >= 1: 
+        if (self.measures.irSensor[center_id] + self.measures.irSensor[back_id] )/ 2 >= 1: 
             walls[0] = 1
         if self.measures.irSensor[right_id] >= 1.2: 
             #print("wall right")
@@ -656,9 +656,9 @@ class MyRob(CRobLinkAngs):
         if self.measures.irSensor[left_id] >= 1.2: 
             #print("wall left")
             walls[2]=1
-        if self.measures.irSensor[back_id] >= 1.2: 
-            #print("wall back")
-            walls[3]=1
+        # if self.measures.irSensor[back_id] >= 1.2: 
+        #     #print("wall back")
+        #     walls[3]=1
         
         #print(walls)
         return walls
@@ -727,7 +727,7 @@ for i in range(1, len(sys.argv),2):
         quit()
 
 if __name__ == '__main__':
-    rob=MyRob(rob_name,pos,[0.0,90.0,-90.0,180.0],host)
+    rob=MyRob(rob_name,pos,[0.0,90.0,-90.0,0],host)
     if mapc != None:
         rob.setMap(mapc.labMap)
         rob.printMap()
