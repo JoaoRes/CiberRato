@@ -7,6 +7,7 @@ from math import *
 import xml.etree.ElementTree as ET
 from astar import *
 from itertools import permutations
+import math
 
 CELLROWS=7
 CELLCOLS=14
@@ -100,8 +101,8 @@ class MyRob(CRobLinkAngs):
                         num = self.goals[(i[0], i[1])]
                         file.write(' #'+str(num))
                     file.write('\n')
+                
                 quit()
-
             if state == 'stop' and self.measures.start:
                 self.mypos = (0,0)
                 self.target = (0,0)
@@ -222,6 +223,10 @@ class MyRob(CRobLinkAngs):
                 state = self.next_move(self.prevTarget, self.target)
 
             self.mypos = self.my_gps(self.prev_gps[0],self.prev_gps[1]) 
+
+            if self.measures.time == 5995: 
+                self.finish()
+
             # print("PATH-> ", self.path)
             print("MY POS-> ", round(self.mypos[0]) ,round(self.mypos[1]))
             #print("TEMPO ->", self.measures.time)
@@ -322,10 +327,10 @@ class MyRob(CRobLinkAngs):
 
             # if walls[1]==1:
             #     wall_position = (self.prevTarget[0], self.prevTarget[1]+1)
-            #     self.mypos = (self.prevTarget[0], wall_position[1] - self.distSensor(left_id)-0.5)
+            #     self.mypos = (self.prevTarget[0], wall_position[1] + self.distSensor(left_id)+0.5)
             # elif walls[2] == 1:
             #     wall_position = (self.prevTarget[0], self.prevTarget[1]-1)
-            #     self.mypos = (self.prevTarget[0], wall_position[1] + self.distSensor(left_id) + 0.5)
+            #     self.mypos = (self.prevTarget[0], wall_position[1] - self.distSensor(left_id) - 0.5)
 
         if self.correctCompass()==90:
             if walls[0]==1:
@@ -387,6 +392,7 @@ class MyRob(CRobLinkAngs):
         return(self.gps)
 
     def straight(self, linear, m, k, ref):
+        
         rot = k * (m-ref)
 
         ##print("ROT ->", rot)
@@ -606,8 +612,14 @@ class MyRob(CRobLinkAngs):
 
             
             if len(self.dictionary_noTaken.keys()) == 0:
-                #print("MESTRE DA CULINARIA")
-                self.finish()
+                if self.mypos == (0,0):
+                    self.finish()
+                else:
+                    self.path = astar(self.prevTarget,(0,0),self.visited,self.walls)
+                    self.target= self.path.pop()
+                    self.calculate == False
+                    if len(self.path)!= 0:
+                        self.havepath==True
                 return
 
             #print("LENGTH DICIONARIO -> " , len(self.dictionary_noTaken)   )
@@ -624,6 +636,7 @@ class MyRob(CRobLinkAngs):
             self.calculate== False
             if len(self.path)!= 0:
                  self.havepath=True
+
                 
             #print("CAMINHO", self.path)
         
@@ -647,8 +660,9 @@ class MyRob(CRobLinkAngs):
         back_id = 3
         
         walls = [0,0,0,0]       # walls =[front, right, left, back]
+    
 
-        if (self.measures.irSensor[center_id] + self.measures.irSensor[back_id] )/ 2 >= 1: 
+        if (self.measures.irSensor[center_id] + self.measures.irSensor[back_id] )/ 2 >= 0.98: 
             walls[0] = 1
         if self.measures.irSensor[right_id] >= 1.2: 
             #print("wall right")
