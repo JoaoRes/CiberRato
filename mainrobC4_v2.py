@@ -612,7 +612,8 @@ class MyRob(CRobLinkAngs):
 
             
             if len(self.dictionary_noTaken.keys()) == 0:
-                if self.mypos == (0,0):
+                print("DEBUG MYPOS : " ,(round(self.mypos[0]), round(self.mypos[1])))
+                if round(self.mypos[0])==0 and round(self.mypos[1])==0:
                     self.finish()
                 else:
                     self.path = astar(self.prevTarget,(0,0),self.visited,self.walls)
@@ -662,12 +663,12 @@ class MyRob(CRobLinkAngs):
         walls = [0,0,0,0]       # walls =[front, right, left, back]
     
 
-        if (self.measures.irSensor[center_id] + self.measures.irSensor[back_id] )/ 2 >= 0.98: 
+        if (self.measures.irSensor[center_id] + self.measures.irSensor[back_id] )/ 2 >= 0.95: 
             walls[0] = 1
-        if self.measures.irSensor[right_id] >= 1.2: 
+        if self.measures.irSensor[right_id] >= 1.3: 
             #print("wall right")
             walls[1] = 1
-        if self.measures.irSensor[left_id] >= 1.2: 
+        if self.measures.irSensor[left_id] >= 1.3: 
             #print("wall left")
             walls[2]=1
         # if self.measures.irSensor[back_id] >= 1.2: 
