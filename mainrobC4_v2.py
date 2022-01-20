@@ -25,7 +25,7 @@ class MyRob(CRobLinkAngs):
     mypos= ()
     myorient = ()
     nextorient = ()
-    d = {(28,14): 'I'}
+    d = {(28,14): '0'}
     neighbors = [(0,2),(0,-2),(2,0),(-2,0)]
     path = list()
     dictionary_noTaken= dict()
@@ -107,7 +107,7 @@ class MyRob(CRobLinkAngs):
                 self.mypos = (0,0)
                 self.target = (0,0)
                 self.prevTarget = (0,0)
-                #self.posinitial = (self.measures.x, self.measures.y)
+                self.posinitial = (self.measures.x, self.measures.y)
                 self.gps_robo = (0,0)
                 state = stopped_state
 
@@ -117,7 +117,7 @@ class MyRob(CRobLinkAngs):
 
             if state == 'go':
                 self.myorient = self.correctCompass()
-                #self.gps_robo = (self.measures.x - self.posinitial[0], self.measures.y- self.posinitial[1])
+                self.gps_robo = (self.measures.x - self.posinitial[0], self.measures.y- self.posinitial[1])
                 # print('POSICAO INICIAL', self.posinitial)
                 # print('MINHA POSICAO', self.mypos)
                 # print('TARGET',self.target)
@@ -204,11 +204,11 @@ class MyRob(CRobLinkAngs):
                     self.in_left=0
                     #self.out = ( (0 + self.out_1[0]) / 2 , (0 + self.out_1[1]) / 2 )
             if state == 'end':
-                #print("ANTES DA CORREÇÃO ->" , self.mypos)
+                print("ANTES DA CORREÇÃO ->" , self.mypos)
                 self.gps_Correction(self.checkwalls())
-                #print("DEPOIS DA CORREÇÃO -> ", self.mypos)
+                print("DEPOIS DA CORREÇÃO -> ", self.mypos)
                 if self.calculate== True:
-                    print("Print Walls", self.checkwalls())
+                    #print("Print Walls", self.checkwalls())
                     
                     if self.havepath == True:
                         # print("PATH -> " ,self.path)
@@ -228,10 +228,11 @@ class MyRob(CRobLinkAngs):
                 self.finish()
 
             # print("PATH-> ", self.path)
-            print("MY POS-> ", round(self.mypos[0]) ,round(self.mypos[1]))
+            #print("MY POS CALCULADO-> ", round(self.mypos[0],3) , round(self.mypos[1],3))
+            #print("MY POS GPS ->" , (round(self.gps_robo[0],3) ,round(self.gps_robo[1],3)))
             #print("TEMPO ->", self.measures.time)
             # print("TARGET -> ", self.target)
-            print("ORIENTACAO -> ", self.correctCompass())
+            #print("ORIENTACAO -> ", self.correctCompass())
 
             
                 
@@ -316,54 +317,92 @@ class MyRob(CRobLinkAngs):
 
     def gps_Correction(self, walls):
         center_id = 0
-        left_id = 1
-        right_id = 2
+        right_id = 1
+        left_id = 2
         back_id = 3
+
+        (x,y) = (round(self.mypos[0]), round(self.mypos[1]))
+        if ((x,y) == (0,0)):
+            return
 
         if self.correctCompass()==0:
             if walls[0]==1:
-                wall_position = (self.prevTarget[0]+1, self.prevTarget[1])
-                self.mypos = (wall_position[0]-self.distSensor(center_id)-0.5, self.prevTarget[1])
+                wall_position = (x+1, y)
+                self.mypos = (wall_position[0]-self.distSensor(center_id)-0.5, wall_position[1])
 
-            # if walls[1]==1:
-            #     wall_position = (self.prevTarget[0], self.prevTarget[1]+1)
-            #     self.mypos = (self.prevTarget[0], wall_position[1] + self.distSensor(left_id)+0.5)
-            # elif walls[2] == 1:
-            #     wall_position = (self.prevTarget[0], self.prevTarget[1]-1)
-            #     self.mypos = (self.prevTarget[0], wall_position[1] - self.distSensor(left_id) - 0.5)
+            if walls[1] == 1:
+                wall_position = (x, y-1)
+                print("WALL POSITION", wall_position)
+                print(self.distSensor(right_id))
+                self.mypos = (wall_position[0], wall_position[1] + self.distSensor(right_id) + 0.5)
+                print("HERE")
+            elif walls[2]==1:
+                wall_position = (x, y+1)
+                self.mypos = (wall_position[0], wall_position[1] - self.distSensor(left_id) - 0.5)
+                print("THERE")
 
         if self.correctCompass()==90:
             if walls[0]==1:
-                wall_position = (self.prevTarget[0], self.prevTarget[1]+1)
-                self.mypos = (self.prevTarget[0], wall_position[0]-self.distSensor(center_id)-0.5)
+                wall_position = (x, y+1)
+                self.mypos = (wall_position[0], -self.distSensor(center_id)-0.5 + wall_position[1])
+
+            if walls[1] == 1:
+                wall_position = (x-1, y)
+                self.mypos = (wall_position[0] + self.distSensor(right_id) + 0.5, wall_position[1])
+            elif walls[2]==1:
+                wall_position = (x+1, y)
+                self.mypos = (wall_position[0] - self.distSensor(left_id) - 0.5,  wall_position[1])
+            # if walls[0]==1:
+            #     wall_position = (self.prevTarget[0], self. prevTarget[1]+1)
+            #     self.mypos = (self.prevTarget[0], wall_position[0]-self.distSensor(center_id)-0.5)
             
-            # if walls[1]==1:
+            # if walls[2]==1:
             #     wall_position = (self.prevTarget[0]-1, self.prevTarget[1])
             #     self.mypos = (wall_position[0] + self.distSensor(left_id) + 0.5, self.prevTarget[1])
-            # elif walls[2] == 1:
+            # elif walls[1] == 1:
             #     wall_position = (self.prevTarget[0]+1, self.prevTarget[1])
             #     self.mypos = (wall_position[0] - self.distSensor(right_id) - 0.5, self.prevTarget[1])
 
         if self.correctCompass()==-90:
             if walls[0]==1:
-                wall_position = (self.prevTarget[0], self.prevTarget[1]-1)
-                self.mypos = (self.prevTarget[0], wall_position[0]+self.distSensor(center_id)+0.5)
+                wall_position = (x, y-1)
+                self.mypos = (wall_position[0], self.distSensor(center_id) + 0.5 + wall_position[1])
 
-            # if walls[1]==1:
+            if walls[1] == 1:
+                wall_position = (x+ 1, y)
+                self.mypos = (wall_position[0] - self.distSensor(right_id) - 0.5, wall_position[1])
+            elif walls[2]==1:
+                wall_position = (x-1, y)
+                self.mypos = (wall_position[0] + self.distSensor(left_id) + 0.5,  wall_position[1])
+            # if walls[0]==1:
+            #     wall_position = (self.prevTarget[0], self.prevTarget[1]-1)
+            #     self.mypos = (self.prevTarget[0], wall_position[0]+self.distSensor(center_id)+0.5)
+
+            # if walls[2]==1:
             #     wall_position = (self.prevTarget[0]+1, self.prevTarget[1])
             #     self.mypos = (wall_position[0] - self.distSensor(right_id) - 0.5, self.prevTarget[1])
-            # elif walls[2] == 1:
+            # elif walls[1] == 1:
             #     wall_position = (self.prevTarget[0]-1, self.prevTarget[1])
             #     self.mypos = (wall_position[0] + self.distSensor(left_id) + 0.5, self.prevTarget[1])
 
         if self.correctCompass()==-180 or 180:
             if walls[0]==1:
-                wall_position = (self.prevTarget[0]-1, self.prevTarget[1])
-                self.mypos = (wall_position[0]+self.distSensor(center_id)+0.5, self.prevTarget[1])
-            # if walls[1]==1:
+                wall_position = (x-1, y)
+                self.mypos = (wall_position[0]+self.distSensor(center_id)+0.5, wall_position[1])
+
+            if walls[1] == 1:
+                wall_position = (x, y+1)
+                self.mypos = (wall_position[0], wall_position[1] - self.distSensor(right_id) - 0.5)
+            elif walls[2]==1:
+                wall_position = (x, y-1)
+                self.mypos = (wall_position[0], wall_position[1] + self.distSensor(left_id) + 0.5)
+            # if walls[0]==1:
+            #     wall_position = (self.prevTarget[0]-1, self.prevTarget[1])
+            #     self.mypos = (wall_position[0]+self.distSensor(center_id)+0.5, self.prevTarget[1])
+            # if walls[2]==1:
             #     wall_position = (self.prevTarget[0], self.prevTarget[1]-1)
             #     self.mypos = (self.prevTarget[0], wall_position[1] + self.distSensor(left_id) + 0.5)
-            # elif walls[2] == 1:
+            # elif walls[1] == 1:
             #     wall_position = (self.prevTarget[0], self.prevTarget[1]+1)
             #     self.mypos = (self.prevTarget[0], wall_position[1] - self.distSensor(left_id)-0.5)
 
@@ -382,7 +421,7 @@ class MyRob(CRobLinkAngs):
         else: 
             lin = (self.out[0]+self.out[1])/2   
 
-
+        print("LIN", lin)
         self.gps = ( prev_x + lin *cos(radians(self.correctCompass())) , prev_y + lin *sin(radians(self.correctCompass())))
         
         
@@ -643,7 +682,7 @@ class MyRob(CRobLinkAngs):
         
         #print("not taken", self.dictionary_noTaken)
         if self.measures.ground != -1 and (x,y)!=(0,0): 
-            self.d[(x+28,14-y)] = 'O'
+            self.d[(x+28,14-y)] = str(self.measures.ground)
             self.goals[(x,y)] = self.measures.ground
         else:
             self.add_dict((28+x,14-y), 'X')
@@ -663,7 +702,7 @@ class MyRob(CRobLinkAngs):
         walls = [0,0,0,0]       # walls =[front, right, left, back]
     
 
-        if (self.measures.irSensor[center_id] + self.measures.irSensor[back_id] )/ 2 >= 0.95: 
+        if (self.measures.irSensor[center_id] + self.measures.irSensor[back_id] ) /2 >= 0.95: 
             walls[0] = 1
         if self.measures.irSensor[right_id] >= 1.3: 
             #print("wall right")
@@ -671,9 +710,9 @@ class MyRob(CRobLinkAngs):
         if self.measures.irSensor[left_id] >= 1.3: 
             #print("wall left")
             walls[2]=1
-        # if self.measures.irSensor[back_id] >= 1.2: 
-        #     #print("wall back")
-        #     walls[3]=1
+        if self.measures.irSensor[back_id] >= 1.3: 
+            #print("wall back")
+            walls[3]=1
         
         #print(walls)
         return walls
