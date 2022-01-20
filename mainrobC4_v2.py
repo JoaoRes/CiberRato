@@ -500,7 +500,7 @@ class MyRob(CRobLinkAngs):
             else: 
                 self.add_dict((28+x+1,14-y), 'X')
                 print('X :', (x+1,y))
-                tmp[0] = (self.prevTarget[0]+2,self.prevTarget[1])
+                tmp[1] = (self.prevTarget[0]+2,self.prevTarget[1])
                 #tmp[0]=(x+2,y)
                 if (x+2,y) not in self.visited:
                     self.add_dict((28+x+2,14-y), 'X')
@@ -510,7 +510,7 @@ class MyRob(CRobLinkAngs):
             else: 
                 self.add_dict((28+x,14-y+1), 'X')
                 print('X :', (x,y+1))
-                tmp[1] = (self.prevTarget[0],self.prevTarget[1]-2)
+                tmp[0] = (self.prevTarget[0],self.prevTarget[1]-2)
                 #tmp[1]=(x,y-2)
                 if (x,y-2) not in self.visited:
                     self.add_dict((28+x,14-y+2), 'X')
@@ -532,7 +532,7 @@ class MyRob(CRobLinkAngs):
             else: 
                 self.add_dict((28+x,14-y-1), 'X')
                 print('X :', (x,y-1))
-                tmp[0] = (self.prevTarget[0],self.prevTarget[1]+2)
+                tmp[1] = (self.prevTarget[0],self.prevTarget[1]+2)
                 #tmp[0]=(x,y+2)
                 if (x,y+2) not in self.visited:
                     self.add_dict((28+x,14-y+2), 'X')
@@ -542,7 +542,7 @@ class MyRob(CRobLinkAngs):
             else: 
                 self.add_dict((28+x+1,14-y), 'X')
                 print('X :', (x+1,y))
-                tmp[1] = (self.prevTarget[0]+2,self.prevTarget[1])
+                tmp[0] = (self.prevTarget[0]+2,self.prevTarget[1])
                 #tmp[1]=(x+2,y)
                 if (x+2,y) not in self.visited:
                     self.add_dict((28+x+2,14-y), 'X')
@@ -564,7 +564,7 @@ class MyRob(CRobLinkAngs):
             else: 
                 self.add_dict((28+x-1,14-y), 'X')
                 print('X :', (x-1,y))
-                tmp[0] = (self.prevTarget[0]-2,self.prevTarget[1])
+                tmp[1] = (self.prevTarget[0]-2,self.prevTarget[1])
                 #tmp[0] = (x-2,y)self.mapWriting()
                 if (x+2,y) not in self.visited:
                     self.add_dict((28+x-2,14-y), 'X')
@@ -574,7 +574,7 @@ class MyRob(CRobLinkAngs):
             else: 
                 self.add_dict((28+x,14-y-1), 'X')
                 print('X :', (x,y-1))
-                tmp[1] = (self.prevTarget[0],self.prevTarget[1]+2)
+                tmp[0] = (self.prevTarget[0],self.prevTarget[1]+2)
                 #tmp[1]= (x,y+2)
                 if (x,y+2) not in self.visited:
                     self.add_dict((28+x,14-y-2), 'X')
@@ -596,7 +596,7 @@ class MyRob(CRobLinkAngs):
             else: 
                 self.add_dict((28+x,14-y+1), 'X')
                 print('X :', (x,y+1))
-                tmp[0] = (self.prevTarget[0],self.prevTarget[1]-2)
+                tmp[1] = (self.prevTarget[0],self.prevTarget[1]-2)
                 #tmp[0]=(x,y-2)
                 if (x,y-2) not in self.visited:
                     self.add_dict((28+x,14-y-2), 'X')
@@ -606,7 +606,7 @@ class MyRob(CRobLinkAngs):
             else: 
                 self.add_dict((28+x-1,14-y), 'X')
                 print('X :', (x-1,y))
-                tmp[1] = (self.prevTarget[0]-2,self.prevTarget[1])
+                tmp[0] = (self.prevTarget[0]-2,self.prevTarget[1])
                 #tmp[1]=(x-2,y)
                 if (x-2,y) not in self.visited:
                     self.add_dict((28+x-2,14-y), 'X')
